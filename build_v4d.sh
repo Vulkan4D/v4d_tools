@@ -18,15 +18,12 @@ LIBS="\
   -lpthread \
 "
 
-# Additional Arguments
-ARGS="$3"
-
 # Platform options
 if [ $1 == "WINDOWS" ] ; then
   PLATFORM='WINDOWS'
   PLATFORM_OPTIONS='-D_WINDOWS'
   COMPILER='x86_64-w64-mingw32-g++'
-  OUTPUT_EXT='.dll'
+  OUTPUT_EXT='dll'
   LIBS="$LIBS\
     -lwinpthread \
     -lstdc++ \
@@ -41,7 +38,7 @@ else
   PLATFORM='LINUX'
   PLATFORM_OPTIONS='-D_LINUX'
   COMPILER='g++'
-  OUTPUT_EXT='.so'
+  OUTPUT_EXT='so'
   LIBS="$LIBS\
     `pkg-config --static --libs glfw3 vulkan` \
     -lGLU -lGL \
@@ -52,37 +49,48 @@ fi
 if [ $2 == "RELEASE" ] ; then
   MODE='RELEASE'
   OUTPUT_DIR='build/release'
-  OPTIONS="-shared -o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT -O3 -D_RELEASE $PLATFORM_OPTIONS $ARGS"
+  OPTIONS="-O3 -D_RELEASE"
 else
   MODE='DEBUG'
   OUTPUT_DIR='build/debug'
-  OPTIONS="-shared -o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT -ggdb -g -O0 -D_DEBUG $PLATFORM_OPTIONS $ARGS -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer"
+  OPTIONS="-ggdb -g -O0 -D_DEBUG"
+  # -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
+
+# Additional Arguments
+ARGS="$3"
 
 # Prepare Output Directory
 mkdir -p "$OUTPUT_DIR"
 if [ -d "res" ] && [ ! -d "$OUTPUT_DIR/res" ] ; then
-  ln -s ../res "$OUTPUT_DIR/res"
+  ln -s ../../res "$OUTPUT_DIR/res"
 fi
 
 # Check for Shaders to compile
-if [ -d "src/v4d/core/shaders" ] ; then
-  # Compile Modified Shaders
-  mkdir -p "$OUTPUT_DIR/shaders"
-  tools/shadercompiler/shadercompiler.linux "$OUTPUT_DIR/shaders" `find src/v4d/core/shaders -maxdepth 1 -type f`
-fi
+#if [ -d "src/v4d/core/modules/graphics/shaders" ] ; then
+#  # Compile Modified Shaders
+#  mkdir -p "$OUTPUT_DIR/shaders"
+#  tools/shadercompiler/shadercompiler.linux "$OUTPUT_DIR/shaders" `find src/v4d/core/shaders -maxdepth 1 -type f`
+#fi
 
 # If shader compilation was successful, Start Build
 if [ $? == 0 ] ; then
 
   # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
-  COMMAND="$COMPILER $OPTIONS \
+  COMMAND="$COMPILER \
+    -Wall \
+    -shared -Wl,-soname,$OUTPUT_NAME.$OUTPUT_EXT \
+    -o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT \
+    $OPTIONS \
+    -D_V4D_CORE
+    $PLATFORM_OPTIONS \
+    $ARGS \
+    -fPIC \
     -std=c++17 \
     -m64 \
-    -Wall \
     -I. \
     $INCLUDES \
-    src/*.cpp \
+    `find src/v4d/core -type f -name *.cpp` \
     $LIBS \
   "
 

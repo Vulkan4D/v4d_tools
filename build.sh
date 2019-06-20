@@ -18,15 +18,13 @@ LIBS="\
   -lpthread \
 "
 
-# Additional Arguments
-ARGS="$3"
-
 # Platform options
 if [ $1 == "WINDOWS" ] ; then
   PLATFORM='WINDOWS'
   PLATFORM_OPTIONS='-D_WINDOWS'
   COMPILER='x86_64-w64-mingw32-g++'
-  OUTPUT_EXT='.exe'
+  OUTPUT_EXT='exe'
+  V4D_LIB='v4d.dll'
   LIBS="$LIBS\
     -lwinpthread \
     -lstdc++ \
@@ -41,7 +39,8 @@ else
   PLATFORM='LINUX'
   PLATFORM_OPTIONS='-D_LINUX'
   COMPILER='g++'
-  OUTPUT_EXT='.linux'
+  OUTPUT_EXT='linux'
+  V4D_LIB='v4d.so'
   LIBS="$LIBS\
     `pkg-config --static --libs glfw3 vulkan` \
     -lGLU -lGL \
@@ -52,27 +51,37 @@ fi
 if [ $2 == "RELEASE" ] ; then
   MODE='RELEASE'
   OUTPUT_DIR='build/release'
-  OPTIONS="-o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT -O3 -D_RELEASE $PLATFORM_OPTIONS $ARGS"
+  OPTIONS="-O3 -D_RELEASE"
 else
   MODE='DEBUG'
   OUTPUT_DIR='build/debug'
-  OPTIONS="-o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT -ggdb -g -O0 -D_DEBUG $PLATFORM_OPTIONS $ARGS -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer"
+  OPTIONS="-ggdb -g -O0 -D_DEBUG"
+  # -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
+
+# Additional Arguments
+ARGS="$3"
 
 # Prepare Output Directory
 mkdir -p "$OUTPUT_DIR"
 if [ -d "res" ] && [ ! -d "$OUTPUT_DIR/res" ] ; then
-  ln -s ../res "$OUTPUT_DIR/res"
+  ln -s ../../res "$OUTPUT_DIR/res"
 fi
 
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
-COMMAND="$COMPILER $OPTIONS \
+COMMAND="$COMPILER \
+  -Wall \
+  -o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT \
+  $OPTIONS \
+  $PLATFORM_OPTIONS \
+  $ARGS \
   -std=c++17 \
   -m64 \
-  -Wall \
   -I. \
   $INCLUDES \
   src/*.cpp \
+  -Wl,-rpath,. \
+  $OUTPUT_DIR/$V4D_LIB \
   $LIBS \
 "
 
