@@ -3,24 +3,28 @@ PROJECT_DIR="`dirname $0`/.."
 cd $PROJECT_DIR
 set -e
 
-OUTPUT_NAME='demo'
+# args
+PLATFORM="$1"
+MODE="$2"
+# Additional Arguments
+ARGS="$3"
 
 # Paths (Libraries, includes, ...)
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
 export VULKAN_SDK="$PROJECT_DIR/src/vulkan_x86_64"
 INCLUDES="\
-  -I$PROJECT_DIR/src/glm \
-  -I$PROJECT_DIR/src/glfw/include \
-  -I$PROJECT_DIR/src/vulkan_x86_64/include \
   -I$PROJECT_DIR/src/v4d/core \
 "
 LIBS="\
   -lpthread \
 "
 
+#vars
+ENTRY_FILE='main.cpp'
+OUTPUT_NAME='demo'
+
 # Platform options
-if [ $1 == "WINDOWS" ] ; then
-  PLATFORM='WINDOWS'
+if [ $PLATFORM == "WINDOWS" ] ; then
   PLATFORM_OPTIONS='-D_WINDOWS'
   COMPILER='x86_64-w64-mingw32-g++'
   OUTPUT_EXT='exe'
@@ -31,9 +35,6 @@ if [ $1 == "WINDOWS" ] ; then
     -lgcc \
     -static -static-libgcc -static-libstdc++ \
     -Ldll \
-    -lglfw3 -lgdi32 \
-    -lvulkan-1 \
-    -lopengl32 \
   "
 else
   PLATFORM='LINUX'
@@ -42,30 +43,32 @@ else
   OUTPUT_EXT='linux'
   V4D_LIB='v4d.so'
   LIBS="$LIBS\
-    `pkg-config --static --libs glfw3 vulkan` \
-    -lGLU -lGL \
   "
 fi
 
 # Build Modes
-if [ $2 == "RELEASE" ] ; then
-  MODE='RELEASE'
+if [ $MODE == "RELEASE" ] ; then
   OUTPUT_DIR='build/release'
   OPTIONS="-O3 -D_RELEASE"
 else
-  MODE='DEBUG'
   OUTPUT_DIR='build/debug'
   OPTIONS="-ggdb -g -O0 -D_DEBUG"
   # -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
-
-# Additional Arguments
-ARGS="$3"
+if [ $MODE == "TESTS" ] ; then
+  OUTPUT_NAME='tests'
+  ENTRY_FILE='tests.cxx'
+fi
 
 # Prepare Output Directory
 mkdir -p "$OUTPUT_DIR"
 if [ -d "res" ] && [ ! -d "$OUTPUT_DIR/res" ] ; then
   ln -s ../../res "$OUTPUT_DIR/res"
+fi
+
+# Build V4D lib if does not exist
+if [ ! -f "$OUTPUT_DIR/$V4D_LIB" ] ; then
+  tools/build_v4d.sh $1 $2 $3
 fi
 
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
@@ -79,7 +82,7 @@ COMMAND="$COMPILER \
   -m64 \
   -I. \
   $INCLUDES \
-  src/*.cpp \
+  src/$ENTRY_FILE \
   -Wl,-rpath,. \
   $OUTPUT_DIR/$V4D_LIB \
   $LIBS \
@@ -99,7 +102,7 @@ echo ""
 if [ $? == 0 -a $1 == "ALL" ] ; then
   echo "--------------------------------
   "
-  sh/build.sh WINDOWS $2 $3
+  tools/build.sh WINDOWS $2 $3
 fi
 
 # Exit with code from last command
