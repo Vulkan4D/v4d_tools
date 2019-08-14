@@ -25,7 +25,9 @@ OUTPUT_NAME='demo'
 
 # Platform options
 if [ $PLATFORM == "WINDOWS" ] ; then
-  PLATFORM_OPTIONS='-D_WINDOWS'
+  PLATFORM_OPTIONS="
+    -D_WINDOWS \
+  "
   COMPILER='x86_64-w64-mingw32-g++'
   OUTPUT_EXT='exe'
   V4D_LIB='v4d.dll'
@@ -38,11 +40,15 @@ if [ $PLATFORM == "WINDOWS" ] ; then
   "
 else
   PLATFORM='LINUX'
-  PLATFORM_OPTIONS='-D_LINUX'
+  PLATFORM_OPTIONS="
+    -D_LINUX \
+    -rdynamic \
+  "
   COMPILER='g++'
   OUTPUT_EXT='linux'
   V4D_LIB='v4d.so'
   LIBS="$LIBS\
+    -ldl \
   "
 fi
 
@@ -94,7 +100,7 @@ echo $COMMAND
 echo "    .....
 "
 OUTPUT=`$COMMAND && echo "
-$PLATFORM BUILD SUCCESS"`
+$MODE BUILD SUCCESSFUL FOR $PLATFORM"`
 echo $OUTPUT
 echo ""
 

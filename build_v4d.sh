@@ -27,7 +27,9 @@ OUTPUT_NAME='v4d'
 
 # Platform options
 if [ $PLATFORM == "WINDOWS" ] ; then
-  PLATFORM_OPTIONS='-D_WINDOWS'
+  PLATFORM_OPTIONS="
+    -D_WINDOWS \
+  "
   COMPILER='x86_64-w64-mingw32-g++'
   OUTPUT_EXT='dll'
   LIBS="$LIBS\
@@ -40,15 +42,21 @@ if [ $PLATFORM == "WINDOWS" ] ; then
     -lvulkan-1 \
     -lopengl32 \
   "
+  COMMON_HEADER='src/v4d/core/common_windows.hh'
 else
   PLATFORM='LINUX'
-  PLATFORM_OPTIONS='-D_LINUX'
+  PLATFORM_OPTIONS="
+    -D_LINUX \
+    -rdynamic \
+  "
   COMPILER='g++'
   OUTPUT_EXT='so'
   LIBS="$LIBS\
+    -ldl \
     `pkg-config --static --libs glfw3 vulkan` \
     -lGLU -lGL \
   "
+  COMMON_HEADER='src/v4d/core/common_linux.hh'
 fi
 
 # Build Modes
@@ -84,21 +92,21 @@ if [ ! -f "src/v4d/core/common.hh.gch" ] ; then
       -m64 \
       -I. \
       $INCLUDES \
-      src/v4d/core/common.hh \
+      $COMMON_HEADER \
     "
     echo "Rebuilding PreCompiled Common Header..."
     echo $COMMAND
     echo "    .....
     "
     OUTPUT=`$COMMAND && echo "
-    SUCCESS
+    COMMON HEADERS COMPILED SUCCESSFULLY FOR $PLATFORM
     "`
     echo $OUTPUT
     echo ""
   fi
 else 
   if [ $MODE == "RELEASE" ] ; then
-    rm -rf src/v4d/core/common.hh.gch
+    rm -rf "$COMMON_HEADER.gch"
   fi
 fi
 
@@ -136,7 +144,7 @@ if [ $? == 0 ] ; then
   echo "    .....
   "
   OUTPUT=`$COMMAND && echo "
-  $PLATFORM V4D BUILD SUCCESS"`
+  V4D $MODE BUILD SUCCESSFUL FOR $PLATFORM"`
   echo $OUTPUT
   echo ""
 
