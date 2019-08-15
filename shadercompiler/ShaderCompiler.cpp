@@ -28,15 +28,15 @@ static unordered_map<uint, const char*> SHADER_TYPES = {
 };
 
 string exec(string cmd) {
-    array<char, 128> buffer;
-    string result;
-    shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-    if (!pipe) throw runtime_error("popen() failed!");
-    while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-            result += buffer.data();
-    }
-    return result;
+	array<char, 128> buffer;
+	string result;
+	shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (!pipe) throw runtime_error("popen() failed!");
+	while (!feof(pipe.get())) {
+		if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+			result += buffer.data();
+	}
+	return result;
 }
 
 bool CompileShader(string src, string dst) {
