@@ -38,6 +38,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-static -static-libgcc -static-libstdc++ \
 		-Ldll \
 	"
+	COMMON_HEADER='src/v4d/core/common.windows.hh'
 else
 	PLATFORM='LINUX'
 	PLATFORM_OPTIONS="
@@ -50,6 +51,7 @@ else
 	LIBS="$LIBS\
 		-ldl \
 	"
+	COMMON_HEADER='src/v4d/core/common.linux.hh'
 fi
 
 # Build Modes
@@ -77,11 +79,43 @@ if [ ! -f "$OUTPUT_DIR/$V4D_LIB" ] ; then
 	tools/build_v4d.sh $1 $2 $3
 fi
 
+# Build PreCompiled Common Header (in debug mode only... erase it in release mode)
+if [ ! -f "$COMMON_HEADER.gch" ] ; then
+	if [ $MODE == "DEBUG" ] ; then
+		COMMAND="$COMPILER \
+			-Wall \
+			$OPTIONS \
+			-D_V4D_PROJECT \
+			$PLATFORM_OPTIONS \
+			$ARGS \
+			-std=c++17 \
+			-m64 \
+			-I. \
+			$INCLUDES \
+			$COMMON_HEADER \
+		"
+		echo "Rebuilding PreCompiled Common Header..."
+		echo $COMMAND
+		echo "    .....
+		"
+		OUTPUT=`$COMMAND && echo "
+		COMMON HEADERS COMPILED SUCCESSFULLY FOR $PLATFORM
+		"`
+		echo $OUTPUT
+		echo ""
+	fi
+else 
+	if [ $MODE == "RELEASE" ] ; then
+		rm -rf "$COMMON_HEADER.gch"
+	fi
+fi
+
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
 COMMAND="$COMPILER \
 	-Wall \
 	-o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT \
 	$OPTIONS \
+	-D_V4D_PROJECT \
 	$PLATFORM_OPTIONS \
 	$ARGS \
 	-std=c++17 \

@@ -42,7 +42,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lvulkan-1 \
 		-lopengl32 \
 	"
-	COMMON_HEADER='src/v4d/core/common_windows.hh'
+	COMMON_HEADER='src/v4d/core/common_core.windows.hh'
 else
 	PLATFORM='LINUX'
 	PLATFORM_OPTIONS="
@@ -56,7 +56,7 @@ else
 		`pkg-config --static --libs glfw3 vulkan` \
 		-lGLU -lGL \
 	"
-	COMMON_HEADER='src/v4d/core/common_linux.hh'
+	COMMON_HEADER='src/v4d/core/common_core.linux.hh'
 fi
 
 # Build Modes
@@ -79,7 +79,7 @@ if [ -d "res" ] && [ ! -d "$OUTPUT_DIR/res" ] ; then
 fi
 
 # Build PreCompiled Common Header (in debug mode only... erase it in release mode)
-if [ ! -f "src/v4d/core/common.hh.gch" ] ; then
+if [ ! -f "$COMMON_HEADER.gch" ] ; then
 	if [ $MODE == "DEBUG" ] ; then
 		COMMAND="$COMPILER \
 			-Wall \
