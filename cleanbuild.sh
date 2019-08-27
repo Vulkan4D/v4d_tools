@@ -19,8 +19,8 @@ tools/build.sh ALL RELEASE
 tools/build.sh ALL DEBUG
 
 # build all systems
-find src/v4d/systems/ -type f -name 'build.sh' -exec sh '{}' DEBUG \;
-find src/v4d/systems/ -type f -name 'build.sh' -exec sh '{}' RELEASE \;
+tools/build_systems.sh RELEASE
+tools/build_systems.sh DEBUG
 
 # send all files to remote windows pc
 scp -rq build/debug/* WINDOWS_PC:/v4d_build/debug/
