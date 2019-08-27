@@ -36,6 +36,8 @@ COMMAND_LINUX="g++ \
 	-o $OUTPUT_DIR/$OUTPUT_NAME.so \
 	-D_LINUX \
 	$GLOBAL_COMPILER_FLAGS \
+	-Wl,-rpath,../.. \
+	$OUTPUT_DIR/../../v4d.so \
 "
 
 COMMAND_WINDOWS="x86_64-w64-mingw32-g++ \
@@ -46,11 +48,11 @@ COMMAND_WINDOWS="x86_64-w64-mingw32-g++ \
 	-lwinpthread \
 	-lstdc++ \
 	-lgcc \
-	-static -static-libgcc -static-libstdc++ \
 	$GLOBAL_COMPILER_FLAGS \
+	-Wl,-rpath,../.. \
+	$OUTPUT_DIR/../../v4d.dll \
 "
-#-Wl,-rpath,../.. \
-#$OUTPUT_DIR/../../v4d.dll \
+#-static -static-libgcc -static-libstdc++ \
 
 # Start Build Process for Linux
 OUTPUT=`$COMMAND_LINUX && echo "

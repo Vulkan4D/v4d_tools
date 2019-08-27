@@ -35,8 +35,8 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lwinpthread \
 		-lstdc++ \
 		-lgcc \
-		-static -static-libgcc -static-libstdc++ \
 		-Ldll \
+		-static -static-libgcc -static-libstdc++ \
 	"
 	COMMON_HEADER='src/v4d/core/common.windows.hh'
 else
