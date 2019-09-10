@@ -36,6 +36,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lwinpthread \
 		-lstdc++ \
 		-lgcc \
+		-lws2_32 \
 		-Ldll \
 		-lglfw3 -lgdi32 \
 		-lvulkan-1 \
