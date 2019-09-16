@@ -18,7 +18,6 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 GLOBAL_COMPILER_FLAGS="
-	-D_V4D_SYSTEM \
 	$OPTIONS \
 	-fPIC \
 	-std=c++17 \
