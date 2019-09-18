@@ -3,7 +3,7 @@ PROJECT_DIR="`dirname $0`/.."
 cd $PROJECT_DIR
 
 # Delete generated files for linux build
-rm -rf src/v4d/core/*.gch
+rm -rf src/v4d/core/common/*.gch
 rm -rf build/release/*
 rm -rf build/debug/*
 

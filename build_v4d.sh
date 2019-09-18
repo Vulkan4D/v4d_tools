@@ -43,7 +43,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lopengl32 \
 	"
 	#-static -static-libgcc -static-libstdc++ \
-	COMMON_HEADER='src/v4d/core/common_core.windows.hh'
+	COMMON_HEADER='src/v4d/core/common/common_core.windows.hh'
 else
 	PLATFORM='LINUX'
 	PLATFORM_OPTIONS="
@@ -57,7 +57,7 @@ else
 		`pkg-config --static --libs glfw3 vulkan` \
 		-lGLU -lGL \
 	"
-	COMMON_HEADER='src/v4d/core/common_core.linux.hh'
+	COMMON_HEADER='src/v4d/core/common/common_core.linux.hh'
 fi
 
 # Build Modes

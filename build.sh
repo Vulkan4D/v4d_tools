@@ -39,7 +39,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-Ldll \
 		-static -static-libgcc -static-libstdc++ \
 	"
-	COMMON_HEADER='src/v4d/core/common.windows.hh'
+	COMMON_HEADER='src/v4d/core/common/common.windows.hh'
 else
 	PLATFORM='LINUX'
 	PLATFORM_OPTIONS="
@@ -52,7 +52,7 @@ else
 	LIBS="$LIBS\
 		-ldl \
 	"
-	COMMON_HEADER='src/v4d/core/common.linux.hh'
+	COMMON_HEADER='src/v4d/core/common/common.linux.hh'
 fi
 
 # Build Modes
