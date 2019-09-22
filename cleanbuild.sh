@@ -2,6 +2,11 @@
 PROJECT_DIR="`dirname $0`/.."
 cd $PROJECT_DIR
 
+clear
+echo "
+Erasing old stuff...
+"
+
 # Delete generated files for linux build
 rm -rf src/v4d/core/common/*.gch
 rm -rf build/release/*
@@ -22,7 +27,9 @@ scp -rq dll/* WINDOWS_PC:/v4d_build/debug/
 scp -rq dll/* WINDOWS_PC:/v4d_build/release/
 
 # rebuild all for all platforms and copy files to remote windows pc
-clear
+echo "
+Rebuilding Everything...
+"
 tools/build.sh ALL RELEASE &&\
 tools/build.sh ALL DEBUG &&\
 tools/build.sh ALL TESTS &&\
@@ -43,9 +50,5 @@ ssh WINDOWS_PC "cd /v4d_build/debug/ && tests.exe" &&\
 echo "Running unit tests RELEASE for Windows..." &&\
 ssh WINDOWS_PC "cd /v4d_build/release/ && tests.exe" &&\
 cd ../../ &&\
-tools/successText.sh &&\
-echo -e "
-\033[1;36m
-	***** SUCCESS *****
-\033[0m
-"
+tools/successText.sh
+
