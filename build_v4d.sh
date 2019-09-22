@@ -112,7 +112,7 @@ else
 fi
 
 # Check for Shaders to compile
-#if [ -d "src/v4d/core/modules/graphics/shaders" ] ; then
+#if [ -d "src/v4d/core/utilities/graphics/shaders" ] ; then
 #  # Compile Modified Shaders
 #  mkdir -p "$OUTPUT_DIR/shaders"
 #  tools/shadercompiler/shadercompiler.linux "$OUTPUT_DIR/shaders" `find src/v4d/core/shaders -maxdepth 1 -type f`
