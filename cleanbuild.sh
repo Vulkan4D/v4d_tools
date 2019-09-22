@@ -22,9 +22,9 @@ clear
 tools/build.sh ALL RELEASE
 tools/build.sh ALL DEBUG
 
-# build all systems
-tools/build_systems.sh RELEASE
-tools/build_systems.sh DEBUG
+# build all modules
+tools/build_modules.sh RELEASE
+tools/build_modules.sh DEBUG
 
 # send all files to remote windows pc
 scp -rq build/debug/* WINDOWS_PC:/v4d_build/debug/
