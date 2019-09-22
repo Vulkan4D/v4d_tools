@@ -33,4 +33,17 @@ scp -rq build/debug/* WINDOWS_PC:/v4d_build/debug/ &&\
 scp -rq build/release/* WINDOWS_PC:/v4d_build/release/ &&\
 echo "
 CLEAN BUILD FINISHED
+" &&\
+echo "Running unit tests DEBUG for Linux..." &&\
+cd build/debug && ./tests.linux &&\
+echo "Running unit tests RELEASE for Linux..." &&\
+cd ../release && ./tests.linux &&\
+echo "Running unit tests DEBUG for Windows..." &&\
+ssh WINDOWS_PC "cd /v4d_build/debug/ && tests.exe" &&\
+echo "Running unit tests RELEASE for Windows..." &&\
+ssh WINDOWS_PC "cd /v4d_build/release/ && tests.exe" &&\
+echo -e "
+\033[1;36m
+	***** SUCCESS *****
+\033[0m
 "
