@@ -27,10 +27,12 @@ GLOBAL_COMPILER_FLAGS="
 	*.cpp \
 "
 
+source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
+
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
 
 COMMAND_LINUX="g++ \
-	-Wall \
+	$GCC_FLAGS \
 	-shared -Wl,-soname,$OUTPUT_NAME.so \
 	-o $OUTPUT_DIR/$OUTPUT_NAME.so \
 	-D_LINUX \
@@ -40,7 +42,7 @@ COMMAND_LINUX="g++ \
 "
 
 COMMAND_WINDOWS="x86_64-w64-mingw32-g++ \
-	-Wall \
+	$GCC_FLAGS \
 	-shared -Wl,-soname,$OUTPUT_NAME.dll \
 	-o $OUTPUT_DIR/$OUTPUT_NAME.dll \
 	-D_WINDOWS \

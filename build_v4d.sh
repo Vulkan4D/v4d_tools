@@ -25,6 +25,8 @@ LIBS="\
 #vars
 OUTPUT_NAME='v4d'
 
+source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
+
 # Platform options
 if [ $PLATFORM == "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
@@ -83,7 +85,7 @@ fi
 if [ ! -f "$COMMON_HEADER.gch" ] ; then
 	if [ $MODE == "DEBUG" ] ; then
 		COMMAND="$COMPILER \
-			-Wall \
+			$GCC_FLAGS \
 			$OPTIONS \
 			-D_V4D_CORE
 			$PLATFORM_OPTIONS \
@@ -95,12 +97,11 @@ if [ ! -f "$COMMON_HEADER.gch" ] ; then
 			$INCLUDES \
 			$COMMON_HEADER \
 		"
-		echo "Rebuilding PreCompiled Common Header..."
-		echo $COMMAND
-		echo "    .....
-		"
+		echo "Rebuilding PreCompiled Common Header for $PLATFORM..."
+		#echo $COMMAND
+		echo "    ..... "
 		OUTPUT=`$COMMAND && echo "
-		COMMON HEADERS COMPILED SUCCESSFULLY FOR $PLATFORM
+		SUCCESS
 		"`
 		echo $OUTPUT
 		echo ""
@@ -123,7 +124,7 @@ if [ $? == 0 ] ; then
 
 	# https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
 	COMMAND="$COMPILER \
-		-Wall \
+		$GCC_FLAGS \
 		-shared -Wl,-soname,$OUTPUT_NAME.$OUTPUT_EXT \
 		-o $OUTPUT_DIR/$OUTPUT_NAME.$OUTPUT_EXT \
 		$OPTIONS \
@@ -140,19 +141,17 @@ if [ $? == 0 ] ; then
 	"
 
 	# Start Build Process
-	echo "Started V4D build process $MODE for $PLATFORM"
-	echo $COMMAND
-	echo "    .....
-	"
+	echo "Started V4D Core build process $MODE for $PLATFORM"
+	#echo $COMMAND
+	echo "    ..... "
 	OUTPUT=`$COMMAND && echo "
-	V4D $MODE BUILD SUCCESSFUL FOR $PLATFORM"`
+	SUCCESS
+	"`
 	echo $OUTPUT
 	echo ""
 
 	# Also compile for Windows if target is ALL platforms
 	if [ $? == 0 -a $1 == "ALL" ] ; then
-		echo "--------------------------------
-		"
 		tools/build_v4d.sh WINDOWS $2 $3
 	fi
 
