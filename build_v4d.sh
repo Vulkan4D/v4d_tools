@@ -32,7 +32,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
-	COMPILER='x86_64-w64-mingw32-g++'
+	COMPILER='x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000'
 	OUTPUT_EXT='dll'
 	LIBS="$LIBS\
 		-lwinpthread \
@@ -97,7 +97,7 @@ if [ ! -f "$COMMON_HEADER.gch" ] ; then
 			$INCLUDES \
 			$COMMON_HEADER \
 		"
-		echo "Rebuilding PreCompiled Common Header for $PLATFORM..."
+		echo "Rebuilding PreCompiled Common Core Header for $PLATFORM..."
 		#echo $COMMAND
 		echo "    ..... "
 		OUTPUT=`$COMMAND && echo "

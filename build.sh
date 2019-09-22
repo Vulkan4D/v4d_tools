@@ -30,7 +30,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
-	COMPILER='x86_64-w64-mingw32-g++'
+	COMPILER='x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000'
 	OUTPUT_EXT='exe'
 	V4D_LIB='v4d.dll'
 	LIBS="$LIBS\
@@ -61,12 +61,21 @@ fi
 if [ $MODE == "RELEASE" ] ; then
 	OUTPUT_DIR='build/release'
 	OPTIONS="-O3 -D_RELEASE"
-else
+fi
+if [ $MODE == "DEBUG" ] ; then
 	OUTPUT_DIR='build/debug'
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
 	# -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
 if [ $MODE == "TESTS" ] ; then
+	OUTPUT_DIR='build/debug'
+	OPTIONS="-ggdb -g -O0 -D_DEBUG"
+	OUTPUT_NAME='tests'
+	ENTRY_FILE='tests.cxx'
+fi
+if [ $MODE == "TESTS_RELEASE" ] ; then
+	OUTPUT_DIR='build/release'
+	OPTIONS="-O3 -D_RELEASE"
 	OUTPUT_NAME='tests'
 	ENTRY_FILE='tests.cxx'
 fi

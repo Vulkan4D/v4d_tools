@@ -41,7 +41,7 @@ COMMAND_LINUX="g++ \
 	$OUTPUT_DIR/../../v4d.so \
 "
 
-COMMAND_WINDOWS="x86_64-w64-mingw32-g++ \
+COMMAND_WINDOWS="x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000 \
 	$GCC_FLAGS \
 	-shared -Wl,-soname,$OUTPUT_NAME.dll \
 	-o $OUTPUT_DIR/$OUTPUT_NAME.dll \
