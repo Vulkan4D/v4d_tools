@@ -15,6 +15,7 @@ export VULKAN_SDK="$PROJECT_DIR/src/vulkan_x86_64"
 INCLUDES="\
 	-I$PROJECT_DIR/src/glm \
 	-I$PROJECT_DIR/src/glfw/include \
+	-I$PROJECT_DIR/src/openssl/include \
 	-I$PROJECT_DIR/src/vulkan_x86_64/include \
 	-I$PROJECT_DIR/src/v4d/core \
 "
@@ -43,6 +44,8 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lglfw3 -lgdi32 \
 		-lvulkan-1 \
 		-lopengl32 \
+		-llibssl-1_1-x64 \
+		-llibcrypto-1_1-x64 \
 	"
 	#-static -static-libgcc -static-libstdc++ \
 	COMMON_HEADER='src/v4d/core/common/common_core.windows.hh'
@@ -55,6 +58,7 @@ else
 	COMPILER='g++'
 	OUTPUT_EXT='so'
 	LIBS="$LIBS\
+		-lssl \
 		-ldl \
 		`pkg-config --static --libs glfw3 vulkan` \
 		-lGLU -lGL \
