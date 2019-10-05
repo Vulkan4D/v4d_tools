@@ -73,7 +73,6 @@ if [ $MODE == "RELEASE" ] ; then
 else
 	OUTPUT_DIR='build/debug'
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
-	# -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
 
 # Additional Arguments

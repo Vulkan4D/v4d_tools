@@ -12,6 +12,7 @@ ARGS="$3"
 # Paths (Libraries, includes, ...)
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
 export VULKAN_SDK="$PROJECT_DIR/src/vulkan_x86_64"
+export LSAN_OPTIONS="verbosity=1:log_threads=1"
 INCLUDES="\
 	-I$PROJECT_DIR/src/v4d/core \
 "
@@ -65,11 +66,17 @@ fi
 if [ $MODE == "DEBUG" ] ; then
 	OUTPUT_DIR='build/debug'
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
-	# -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer
 fi
 if [ $MODE == "TESTS" ] ; then
 	OUTPUT_DIR='build/debug'
-	OPTIONS="-ggdb -g -O0 -D_DEBUG"
+	if [ $PLATFORM == "WINDOWS" ] ; then
+		OPTIONS="-ggdb -g -O0 -D_DEBUG"
+	else
+		OPTIONS="-ggdb -g -O0 -D_DEBUG -fsanitize=undefined -fsanitize-address-use-after-scope -fno-omit-frame-pointer"
+		# OPTIONS="-ggdb -g -O0 -D_DEBUG -fsanitize=address"
+		# OPTIONS="-ggdb -g -O0 -D_DEBUG -fsanitize=undefined"
+		# OPTIONS="-ggdb -g -O0 -D_DEBUG -fsanitize=thread"
+	fi
 	OUTPUT_NAME='tests'
 	ENTRY_FILE='tests.cxx'
 fi
