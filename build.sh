@@ -40,7 +40,6 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lgcc \
 		-lws2_32 \
 		-Ldll \
-		-static -static-libgcc -static-libstdc++ \
 	"
 	COMMON_HEADER='src/v4d/core/common/common.windows.hh'
 else

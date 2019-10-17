@@ -1,5 +1,6 @@
 # Errors
 GCC_FLAGS="$GCC_FLAGS -fmax-errors=1"
+GCC_FLAGS="$GCC_FLAGS -Wfatal-errors"
 # GCC_FLAGS="$GCC_FLAGS -Werror"
 
 # Warnings

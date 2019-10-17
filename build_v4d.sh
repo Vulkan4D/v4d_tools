@@ -37,7 +37,6 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 	OUTPUT_EXT='dll'
 	LIBS="$LIBS\
 		-lwinpthread \
-		-lstdc++ \
 		-lgcc \
 		-lws2_32 \
 		-Ldll \
@@ -46,8 +45,8 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lopengl32 \
 		-llibssl-1_1-x64 \
 		-llibcrypto-1_1-x64 \
+		-static-libstdc++ \
 	"
-	#-static -static-libgcc -static-libstdc++ \
 	COMMON_HEADER='src/v4d/core/common/common_core.windows.hh'
 else
 	PLATFORM='LINUX'
