@@ -1,5 +1,8 @@
+# Errors
+GCC_FLAGS="$GCC_FLAGS -fmax-errors=1"
+# GCC_FLAGS="$GCC_FLAGS -Werror"
 
-# Warning Flags
+# Warnings
 GCC_FLAGS="$GCC_FLAGS -Wall"
 GCC_FLAGS="$GCC_FLAGS -Wextra"
 GCC_FLAGS="$GCC_FLAGS -Wnon-virtual-dtor"
@@ -16,7 +19,5 @@ GCC_FLAGS="$GCC_FLAGS -Wlogical-op"
 GCC_FLAGS="$GCC_FLAGS -Wunused"
 GCC_FLAGS="$GCC_FLAGS -Wpessimizing-move"
 GCC_FLAGS="$GCC_FLAGS -Wredundant-move"
-
-# GCC_FLAGS="$GCC_FLAGS -Werror"
 # GCC_FLAGS="$GCC_FLAGS -Wshadow"
 
