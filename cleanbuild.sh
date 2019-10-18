@@ -8,7 +8,7 @@ Erasing old stuff...
 "
 
 # Delete generated files for linux build
-rm -rf src/v4d/core/common/*.gch
+rm -rf build/gch/*
 rm -rf build/release/*
 rm -rf build/debug/*
 
@@ -30,10 +30,14 @@ scp -rq dll/* WINDOWS_PC:/v4d_build/release/
 echo "
 Rebuilding Everything...
 "
-tools/build.sh ALL RELEASE &&\
-tools/build.sh ALL DEBUG &&\
-tools/build.sh ALL TESTS &&\
-tools/build.sh ALL TESTS_RELEASE &&\
+tools/build.sh LINUX RELEASE &&\
+tools/build.sh LINUX DEBUG &&\
+tools/build.sh LINUX TESTS &&\
+tools/build.sh LINUX TESTS_RELEASE &&\
+tools/build.sh WINDOWS RELEASE &&\
+tools/build.sh WINDOWS DEBUG &&\
+tools/build.sh WINDOWS TESTS &&\
+tools/build.sh WINDOWS TESTS_RELEASE &&\
 tools/build_modules.sh RELEASE &&\
 tools/build_modules.sh DEBUG &&\
 scp -rq build/debug/* WINDOWS_PC:/v4d_build/debug/ &&\

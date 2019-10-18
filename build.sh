@@ -9,21 +9,11 @@ MODE="$2"
 # Additional Arguments
 ARGS="$3"
 
-# Paths (Libraries, includes, ...)
-export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
-export VULKAN_SDK="$PROJECT_DIR/src/vulkan_x86_64"
-export LSAN_OPTIONS="verbosity=1:log_threads=1"
-INCLUDES="\
-	-I$PROJECT_DIR/src/v4d/core \
-"
-LIBS="\
-	-lpthread \
-"
+TYPE='PROJECT'
 
 #vars
 ENTRY_FILE='main.cpp'
 OUTPUT_NAME='demo'
-
 source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
 
 # Platform options
@@ -41,7 +31,6 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-lws2_32 \
 		-Ldll \
 	"
-	COMMON_HEADER='src/v4d/core/common/common.windows.hh'
 else
 	PLATFORM='LINUX'
 	PLATFORM_OPTIONS="
@@ -54,7 +43,6 @@ else
 	LIBS="$LIBS\
 		-ldl \
 	"
-	COMMON_HEADER='src/v4d/core/common/common.linux.hh'
 fi
 
 # Build Modes
@@ -97,34 +85,28 @@ if [ ! -f "$OUTPUT_DIR/$V4D_LIB" ] ; then
 	tools/build_v4d.sh $1 $2 $3
 fi
 
-# Build PreCompiled Common Header (in debug mode only... erase it in release mode)
-if [ ! -f "$COMMON_HEADER.gch" ] ; then
-	if [ $MODE == "DEBUG" ] ; then
-		COMMAND="$COMPILER \
-			$GCC_FLAGS \
-			$OPTIONS \
-			-D_V4D_PROJECT \
-			$PLATFORM_OPTIONS \
-			$ARGS \
-			-std=c++17 \
-			-m64 \
-			-I. \
-			$INCLUDES \
-			$COMMON_HEADER \
-		"
-		echo "Rebuilding PreCompiled Common Header for $PLATFORM..."
-		#echo $COMMAND
-		echo "    ..... "
-		OUTPUT=`$COMMAND && echo "
-		SUCCESS
-		"`
-		echo $OUTPUT
-		echo ""
-	fi
-else 
-	if [ $MODE == "RELEASE" ] ; then
-		rm -rf "$COMMON_HEADER.gch"
-	fi
+# Build PreCompiled Common Header if not exists
+if [ ! -f "$PRECOMPILED_COMMON_HEADER" ] ; then
+	mkdir -p "$PRECOMPILED_COMMON_HEADER_DIR"
+	COMMAND="$COMPILER \
+		-o "$PRECOMPILED_COMMON_HEADER" \
+		$GCC_FLAGS \
+		$OPTIONS \
+		-D_V4D_PROJECT \
+		$PLATFORM_OPTIONS \
+		$ARGS \
+		$GCC_COMMON_OPTIONS \
+		$INCLUDES \
+		$COMMON_HEADER \
+	"
+	echo "Rebuilding PreCompiled Common Header $MODE for $PLATFORM..."
+	#echo $COMMAND
+	echo "    ..... "
+	OUTPUT=`$COMMAND && echo "
+	SUCCESS
+	"`
+	echo $OUTPUT
+	echo ""
 fi
 
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
@@ -135,9 +117,7 @@ COMMAND="$COMPILER \
 	-D_V4D_PROJECT \
 	$PLATFORM_OPTIONS \
 	$ARGS \
-	-std=c++17 \
-	-m64 \
-	-I. \
+	$GCC_COMMON_OPTIONS \
 	$INCLUDES \
 	src/$ENTRY_FILE \
 	-Wl,-rpath,. \

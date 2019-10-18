@@ -17,17 +17,16 @@ else
 fi
 mkdir -p "$OUTPUT_DIR"
 
+source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
+
 GLOBAL_COMPILER_FLAGS="
 	$OPTIONS \
 	-fPIC \
-	-std=c++17 \
-	-m64 \
+	$GCC_COMMON_OPTIONS \
 	-I. \
-	-I$PROJECT_DIR/src/v4d/core \
+	$INCLUDES \
 	*.cpp \
 "
-
-source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
 
 # https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
 

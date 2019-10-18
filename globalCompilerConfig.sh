@@ -1,3 +1,31 @@
+# Vars
+
+# Used only for Generating Precompiled Headers
+GCH_DIR="build/gch/$TYPE.$MODE.$PLATFORM"
+COMMON_HEADER="src/v4d/core/common/pch.hh"
+PRECOMPILED_COMMON_HEADER_DIR="$GCH_DIR/common"
+PRECOMPILED_COMMON_HEADER="$PRECOMPILED_COMMON_HEADER_DIR/pch.hh.gch"
+
+INCLUDES="\
+	-I$PROJECT_DIR/$GCH_DIR \
+	-I$PROJECT_DIR/src/v4d/core \
+"
+LIBS="\
+	-lpthread \
+"
+GCC_COMMON_OPTIONS="
+	-std=c++17 \
+	-m64 \
+"
+
+# Paths (Libraries, includes, ...)
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
+export VULKAN_SDK="$PROJECT_DIR/src/vulkan_x86_64"
+export LSAN_OPTIONS="verbosity=1:log_threads=1"
+
+# GCC Flags
+GCC_FLAGS="$GCC_FLAGS -pipe"
+
 # Errors
 GCC_FLAGS="$GCC_FLAGS -fmax-errors=1"
 GCC_FLAGS="$GCC_FLAGS -Wfatal-errors"
