@@ -22,7 +22,7 @@ INCLUDES="$INCLUDES \
 "
 
 # Platform options
-if [ $PLATFORM == "WINDOWS" ] ; then
+if [ "$PLATFORM" = "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
@@ -40,7 +40,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-static-libstdc++ \
 	"
 else 
-if [ $PLATFORM == "LINUX" ] ; then
+if [ "$PLATFORM" = "LINUX" ] ; then
 	PLATFORM_OPTIONS="
 		-D_LINUX \
 		-fPIC \
@@ -59,11 +59,11 @@ fi
 fi
 
 # Build Modes
-if [ $MODE == "RELEASE" ] ; then
+if [ "$MODE" = "RELEASE" ] ; then
 	OUTPUT_DIR='build/release'
 	OPTIONS="-O3 -D_RELEASE"
 else 
-if [ $MODE == "DEBUG" ] ; then
+if [ "$MODE" = "DEBUG" ] ; then
 	OUTPUT_DIR='build/debug'
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
 else

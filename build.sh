@@ -17,7 +17,7 @@ OUTPUT_NAME='demo'
 source "$PROJECT_DIR/tools/globalCompilerConfig.sh"
 
 # Platform options
-if [ $PLATFORM == "WINDOWS" ] ; then
+if [ "$PLATFORM" = "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
@@ -31,7 +31,7 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-Ldll \
 	"
 else
-if [ $PLATFORM == "LINUX" ] ; then
+if [ "$PLATFORM" = "LINUX" ] ; then
 	PLATFORM_OPTIONS="
 		-D_LINUX \
 		-rdynamic \
@@ -48,17 +48,17 @@ fi
 fi
 
 # Build Modes
-if [ $MODE == "RELEASE" ] ; then
+if [ "$MODE" = "RELEASE" ] ; then
 	OUTPUT_DIR='build/release'
 	OPTIONS="-O3 -D_RELEASE"
 fi
-if [ $MODE == "DEBUG" ] ; then
+if [ "$MODE" = "DEBUG" ] ; then
 	OUTPUT_DIR='build/debug'
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
 fi
-if [ $MODE == "TESTS" ] ; then
+if [ "$MODE" = "TESTS" ] ; then
 	OUTPUT_DIR='build/debug'
-	if [ $PLATFORM == "WINDOWS" ] ; then
+	if [ "$PLATFORM" = "WINDOWS" ] ; then
 		OPTIONS="-ggdb -g -O0 -D_DEBUG"
 	else
 		OPTIONS="-ggdb -g -O0 -D_DEBUG -fsanitize=undefined -fsanitize-address-use-after-scope -fno-omit-frame-pointer"
@@ -69,7 +69,7 @@ if [ $MODE == "TESTS" ] ; then
 	OUTPUT_NAME='tests'
 	ENTRY_FILE='tests.cxx'
 fi
-if [ $MODE == "TESTS_RELEASE" ] ; then
+if [ "$MODE" = "TESTS_RELEASE" ] ; then
 	OUTPUT_DIR='build/release'
 	OPTIONS="-O3 -D_RELEASE"
 	OUTPUT_NAME='tests'

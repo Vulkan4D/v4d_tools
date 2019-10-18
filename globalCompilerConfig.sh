@@ -20,7 +20,7 @@ GCC_COMMON_OPTIONS="$GCC_COMMON_OPTIONS \
 	-m64 \
 "
 
-if [ $PLATFORM == "WINDOWS" ] ; then
+if [ "$PLATFORM" = "WINDOWS" ] ; then
 	COMPILER="x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000"
 	# COMPILER="x86_64-w64-mingw32-clang++ -D_WIN32_WINNT=0x06030000"
 else
