@@ -11,6 +11,10 @@ ARGS="$3"
 
 TYPE='PROJECT'
 
+if [ "$PLATFORM" = "ALL" ] ; then
+	PLATFORM='LINUX'
+fi
+
 #vars
 ENTRY_FILE='main.cpp'
 OUTPUT_NAME='demo'
@@ -138,7 +142,7 @@ echo $OUTPUT
 echo ""
 
 # Also compile for Windows if target is ALL platforms
-if [ $? == 0 -a $1 == "ALL" ] ; then
+if [ $? == 0 -a "$1" == "ALL" ] ; then
 	tools/build.sh WINDOWS $2 $3
 fi
 

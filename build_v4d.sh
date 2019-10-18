@@ -11,6 +11,10 @@ ARGS="$3"
 
 TYPE='CORE'
 
+if [ "$PLATFORM" = "ALL" ] ; then
+	PLATFORM='LINUX'
+fi
+
 #vars
 OUTPUT_NAME='v4d'
 source "tools/globalCompilerConfig.sh"
@@ -142,7 +146,7 @@ if [ $? == 0 ] ; then
 	echo ""
 
 	# Also compile for Windows if target is ALL platforms
-	if [ $? == 0 -a $1 == "ALL" ] ; then
+	if [ $? == 0 -a "$1" == "ALL" ] ; then
 		tools/build_v4d.sh WINDOWS $2 $3
 	fi
 
