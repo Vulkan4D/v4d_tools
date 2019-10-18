@@ -21,7 +21,6 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
-	COMPILER='x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000'
 	OUTPUT_EXT='exe'
 	V4D_LIB='v4d.dll'
 	LIBS="$LIBS\
@@ -32,17 +31,20 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 		-Ldll \
 	"
 else
-	PLATFORM='LINUX'
+if [ $PLATFORM == "LINUX" ] ; then
 	PLATFORM_OPTIONS="
 		-D_LINUX \
 		-rdynamic \
 	"
-	COMPILER='g++'
 	OUTPUT_EXT='linux'
 	V4D_LIB='v4d.so'
 	LIBS="$LIBS\
 		-ldl \
 	"
+else
+	echo "Invalid Platform $PLATFORM";
+	exit;
+fi
 fi
 
 # Build Modes

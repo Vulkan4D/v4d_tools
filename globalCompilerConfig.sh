@@ -6,17 +6,27 @@ COMMON_HEADER="src/v4d/core/common/pch.hh"
 PRECOMPILED_COMMON_HEADER_DIR="$GCH_DIR/common"
 PRECOMPILED_COMMON_HEADER="$PRECOMPILED_COMMON_HEADER_DIR/pch.hh.gch"
 
-INCLUDES="\
-	-I$PROJECT_DIR/$GCH_DIR \
+# Include GCH
+INCLUDES="$INCLUDES -I$PROJECT_DIR/$GCH_DIR"
+
+INCLUDES="$INCLUDES \
 	-I$PROJECT_DIR/src/v4d/core \
 "
-LIBS="\
+LIBS="$LIBS \
 	-lpthread \
 "
-GCC_COMMON_OPTIONS="
+GCC_COMMON_OPTIONS="$GCC_COMMON_OPTIONS \
 	-std=c++17 \
 	-m64 \
 "
+
+if [ $PLATFORM == "WINDOWS" ] ; then
+	COMPILER="x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000"
+	# COMPILER="x86_64-w64-mingw32-clang++ -D_WIN32_WINNT=0x06030000"
+else
+	COMPILER="g++"
+	# COMPILER="clang++"
+fi
 
 # Paths (Libraries, includes, ...)
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
@@ -27,11 +37,13 @@ export LSAN_OPTIONS="verbosity=1:log_threads=1"
 GCC_FLAGS="$GCC_FLAGS -pipe"
 
 # Errors
-GCC_FLAGS="$GCC_FLAGS -fmax-errors=1"
+# GCC_FLAGS="$GCC_FLAGS -fmax-errors=1"
 GCC_FLAGS="$GCC_FLAGS -Wfatal-errors"
 # GCC_FLAGS="$GCC_FLAGS -Werror"
 
+
 # Warnings
+
 GCC_FLAGS="$GCC_FLAGS -Wall"
 GCC_FLAGS="$GCC_FLAGS -Wextra"
 GCC_FLAGS="$GCC_FLAGS -Wnon-virtual-dtor"
@@ -42,11 +54,12 @@ GCC_FLAGS="$GCC_FLAGS -Wsign-conversion"
 GCC_FLAGS="$GCC_FLAGS -Wnull-dereference"
 GCC_FLAGS="$GCC_FLAGS -Wdouble-promotion"
 GCC_FLAGS="$GCC_FLAGS -Wformat=2"
-GCC_FLAGS="$GCC_FLAGS -Wduplicated-cond"
-GCC_FLAGS="$GCC_FLAGS -Wduplicated-branches"
-GCC_FLAGS="$GCC_FLAGS -Wlogical-op"
 GCC_FLAGS="$GCC_FLAGS -Wunused"
 GCC_FLAGS="$GCC_FLAGS -Wpessimizing-move"
 GCC_FLAGS="$GCC_FLAGS -Wredundant-move"
-# GCC_FLAGS="$GCC_FLAGS -Wshadow"
 
+GCC_FLAGS="$GCC_FLAGS -Wduplicated-cond"
+GCC_FLAGS="$GCC_FLAGS -Wduplicated-branches"
+GCC_FLAGS="$GCC_FLAGS -Wlogical-op"
+
+# GCC_FLAGS="$GCC_FLAGS -Wshadow"

@@ -26,7 +26,6 @@ if [ $PLATFORM == "WINDOWS" ] ; then
 	PLATFORM_OPTIONS="
 		-D_WINDOWS \
 	"
-	COMPILER='x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000'
 	OUTPUT_EXT='dll'
 	LIBS="$LIBS\
 		-lwinpthread \
@@ -44,9 +43,8 @@ else
 if [ $PLATFORM == "LINUX" ] ; then
 	PLATFORM_OPTIONS="
 		-D_LINUX \
-		-rdynamic \
+		-fPIC \
 	"
-	COMPILER='g++'
 	OUTPUT_EXT='so'
 	LIBS="$LIBS\
 		-lssl \
@@ -93,7 +91,6 @@ if [ ! -f "$PRECOMPILED_COMMON_HEADER" ] ; then
 		-D_V4D_CORE \
 		$PLATFORM_OPTIONS \
 		$ARGS \
-		-fPIC \
 		$GCC_COMMON_OPTIONS \
 		$INCLUDES \
 		$COMMON_HEADER \
