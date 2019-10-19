@@ -1,10 +1,21 @@
-# Vars
+# source this file in build scripts, must first define TYPE,MODE,PLATFORM and optionally INCLUDES,LIBS,GCC_COMMON_OPTIONS,GCC_FLAGS
 
 # Used only for Generating Precompiled Headers
-GCH_DIR="build/gch/$TYPE.$MODE.$PLATFORM"
+GCHMODE="$MODE"
+if [ "$GCHMODE" = "TESTS" ] ; then 
+	GCHMODE="DEBUG"
+fi
+if [ "$GCHMODE" = "INCUBATOR" ] ; then 
+	GCHMODE="DEBUG"
+fi
+if [ "$GCHMODE" = "TESTS_RELEASE" ] ; then 
+	GCHMODE="RELEASE"
+fi
+GCH_DIR="build/gch/$TYPE.$GCHMODE.$PLATFORM"
 COMMON_HEADER="src/v4d/core/common/pch.hh"
 PRECOMPILED_COMMON_HEADER_DIR="$GCH_DIR/common"
 PRECOMPILED_COMMON_HEADER="$PRECOMPILED_COMMON_HEADER_DIR/pch.hh.gch"
+
 
 # Include GCH
 INCLUDES="$INCLUDES -I$PROJECT_DIR/$GCH_DIR"

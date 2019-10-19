@@ -79,6 +79,12 @@ if [ "$MODE" = "TESTS_RELEASE" ] ; then
 	OUTPUT_NAME='tests'
 	ENTRY_FILE='tests.cxx'
 fi
+if [ "$MODE" = "INCUBATOR" ] ; then
+	OUTPUT_DIR='build/debug'
+	OPTIONS="-ggdb -g -O0 -D_DEBUG"
+	OUTPUT_NAME='incubator'
+	ENTRY_FILE='incubator.cpp'
+fi
 
 # Prepare Output Directory
 mkdir -p "$OUTPUT_DIR"
