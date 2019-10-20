@@ -19,10 +19,11 @@ fi
 OUTPUT_NAME='v4d'
 source "tools/globalCompilerConfig.sh"
 INCLUDES="$INCLUDES \
-	-Isrc/glm \
-	-Isrc/glfw/include \
+	-Isrc/Vulkan-Hpp \
+	-Isrc/Vulkan-Hpp/glm \
+	-Isrc/Vulkan-Hpp/glfw/include \
+	-Isrc/Vulkan-Hpp/Vulkan-Headers/include \
 	-Isrc/openssl/include \
-	-Isrc/vulkan_x86_64/include \
 "
 
 # Platform options
