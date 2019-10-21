@@ -23,9 +23,27 @@ INCLUDES="$INCLUDES -I$PROJECT_DIR/$GCH_DIR"
 INCLUDES="$INCLUDES \
 	-I$PROJECT_DIR/src/v4d/core \
 "
+VULKAN_INCLUDES="\
+	-I$PROJECT_DIR/src/Vulkan-Hpp \
+	-I$PROJECT_DIR/src/Vulkan-Hpp/glm \
+	-I$PROJECT_DIR/src/Vulkan-Hpp/glslang \
+	-I$PROJECT_DIR/src/Vulkan-Hpp/glfw/include \
+	-I$PROJECT_DIR/src/Vulkan-Hpp/Vulkan-Headers/include \
+"
 LIBS="$LIBS \
 	-lpthread \
 "
+if [ "$PLATFORM" = "WINDOWS" ] ; then
+	VULKAN_LIBS="\
+		-lglfw3 -lgdi32 \
+		-lvulkan-1 \
+		-lopengl32 \
+	"
+else
+	VULKAN_LIBS="\
+		`pkg-config --static --libs glfw3 vulkan gl glu` \
+	"
+fi
 GCC_COMMON_OPTIONS="$GCC_COMMON_OPTIONS \
 	-std=c++17 \
 	-m64 \
@@ -34,9 +52,16 @@ GCC_COMMON_OPTIONS="$GCC_COMMON_OPTIONS \
 if [ "$PLATFORM" = "WINDOWS" ] ; then
 	COMPILER="x86_64-w64-mingw32-g++ -D_WIN32_WINNT=0x06030000"
 	# COMPILER="x86_64-w64-mingw32-clang++ -D_WIN32_WINNT=0x06030000"
+	LIBS="$LIBS\
+		-lwinpthread \
+		-Ldll \
+	"
 else
 	COMPILER="g++"
 	# COMPILER="clang++"
+	LIBS="$LIBS\
+		-ldl \
+	"
 fi
 
 # Paths (Libraries, includes, ...)
@@ -55,22 +80,22 @@ GCC_FLAGS="$GCC_FLAGS -Wfatal-errors"
 
 # Warnings
 
-GCC_FLAGS="$GCC_FLAGS -Wall"
-GCC_FLAGS="$GCC_FLAGS -Wextra"
+# GCC_FLAGS="$GCC_FLAGS -Wall"
+# GCC_FLAGS="$GCC_FLAGS -Wextra"
 GCC_FLAGS="$GCC_FLAGS -Wnon-virtual-dtor"
 GCC_FLAGS="$GCC_FLAGS -Wcast-align"
 GCC_FLAGS="$GCC_FLAGS -Woverloaded-virtual"
-GCC_FLAGS="$GCC_FLAGS -Wconversion"
-GCC_FLAGS="$GCC_FLAGS -Wsign-conversion"
+# GCC_FLAGS="$GCC_FLAGS -Wconversion"
+# GCC_FLAGS="$GCC_FLAGS -Wsign-conversion"
 GCC_FLAGS="$GCC_FLAGS -Wnull-dereference"
-GCC_FLAGS="$GCC_FLAGS -Wdouble-promotion"
+# GCC_FLAGS="$GCC_FLAGS -Wdouble-promotion"
 GCC_FLAGS="$GCC_FLAGS -Wformat=2"
 GCC_FLAGS="$GCC_FLAGS -Wunused"
 GCC_FLAGS="$GCC_FLAGS -Wpessimizing-move"
 GCC_FLAGS="$GCC_FLAGS -Wredundant-move"
 
 GCC_FLAGS="$GCC_FLAGS -Wduplicated-cond"
-GCC_FLAGS="$GCC_FLAGS -Wduplicated-branches"
+# GCC_FLAGS="$GCC_FLAGS -Wduplicated-branches"
 GCC_FLAGS="$GCC_FLAGS -Wlogical-op"
 
 # GCC_FLAGS="$GCC_FLAGS -Wshadow"

@@ -19,10 +19,7 @@ fi
 OUTPUT_NAME='v4d'
 source "tools/globalCompilerConfig.sh"
 INCLUDES="$INCLUDES \
-	-Isrc/Vulkan-Hpp \
-	-Isrc/Vulkan-Hpp/glm \
-	-Isrc/Vulkan-Hpp/glfw/include \
-	-Isrc/Vulkan-Hpp/Vulkan-Headers/include \
+	$VULKAN_INCLUDES \
 	-Isrc/openssl/include \
 "
 
@@ -33,13 +30,8 @@ if [ "$PLATFORM" = "WINDOWS" ] ; then
 	"
 	OUTPUT_EXT='dll'
 	LIBS="$LIBS\
-		-lwinpthread \
 		-lgcc \
 		-lws2_32 \
-		-Ldll \
-		-lglfw3 -lgdi32 \
-		-lvulkan-1 \
-		-lopengl32 \
 		-llibssl-1_1-x64 \
 		-llibcrypto-1_1-x64 \
 		-static-libstdc++ \
@@ -53,15 +45,17 @@ if [ "$PLATFORM" = "LINUX" ] ; then
 	OUTPUT_EXT='so'
 	LIBS="$LIBS\
 		-lssl \
-		-ldl \
-		`pkg-config --static --libs glfw3 vulkan` \
-		-lGLU -lGL \
 	"
 else
 	echo "Invalid Platform $PLATFORM";
 	exit;
 fi
 fi
+
+# Other libs
+LIBS="$LIBS\
+	$VULKAN_LIBS \
+"
 
 # Build Modes
 if [ "$MODE" = "RELEASE" ] ; then

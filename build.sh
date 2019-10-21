@@ -28,11 +28,9 @@ if [ "$PLATFORM" = "WINDOWS" ] ; then
 	OUTPUT_EXT='exe'
 	V4D_LIB='v4d.dll'
 	LIBS="$LIBS\
-		-lwinpthread \
 		-lstdc++ \
 		-lgcc \
 		-lws2_32 \
-		-Ldll \
 	"
 else
 if [ "$PLATFORM" = "LINUX" ] ; then
@@ -43,7 +41,6 @@ if [ "$PLATFORM" = "LINUX" ] ; then
 	OUTPUT_EXT='linux'
 	V4D_LIB='v4d.so'
 	LIBS="$LIBS\
-		-ldl \
 	"
 else
 	echo "Invalid Platform $PLATFORM";
@@ -84,6 +81,12 @@ if [ "$MODE" = "INCUBATOR" ] ; then
 	OPTIONS="-ggdb -g -O0 -D_DEBUG"
 	OUTPUT_NAME='incubator'
 	ENTRY_FILE='incubator.cpp'
+	LIBS="$LIBS\
+		$VULKAN_LIBS \
+	"
+	INCLUDES="$INCLUDES \
+		$VULKAN_INCLUDES \
+	"
 fi
 
 # Prepare Output Directory
