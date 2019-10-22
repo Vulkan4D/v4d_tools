@@ -2,15 +2,13 @@
 PROJECT_DIR="`dirname $0`/.."
 cd $PROJECT_DIR
 
-clear
+#clear
 echo "
 Erasing old stuff...
 "
 
-# Delete generated files for linux build
-rm -rf build/gch/*
-rm -rf build/release/*
-rm -rf build/debug/*
+# Delete generated files
+rm -rf build/*
 
 # Kill potentially running process on remote windows pc
 ssh WINDOWS_PC "START /wait taskkill /f /im tests.exe"
@@ -30,29 +28,25 @@ scp -rq dll/* WINDOWS_PC:/v4d_build/release/
 echo "
 Rebuilding Everything...
 "
-tools/build.sh LINUX RELEASE &&\
-tools/build.sh LINUX DEBUG &&\
-tools/build.sh LINUX TESTS &&\
-tools/build.sh LINUX TESTS_RELEASE &&\
-tools/build.sh WINDOWS RELEASE &&\
-tools/build.sh WINDOWS DEBUG &&\
-tools/build.sh WINDOWS TESTS &&\
-tools/build.sh WINDOWS TESTS_RELEASE &&\
-tools/build_modules.sh RELEASE &&\
-tools/build_modules.sh DEBUG &&\
-scp -rq build/debug/* WINDOWS_PC:/v4d_build/debug/ &&\
-scp -rq build/release/* WINDOWS_PC:/v4d_build/release/ &&\
+cd build
+x86_64-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 8 &&\
+x86_64-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --parallel 8 &&\
+# cmake -DCMAKE_TOOLCHAIN_FILE=tools/crosscompile_windows_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 8 &&\
+# cmake -DCMAKE_TOOLCHAIN_FILE=tools/crosscompile_windows_toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --parallel 8 &&\
+rm CMakeCache.txt &&\
+cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --parallel 8 &&\
+cmake .. -DCMAKE_BUILD_TYPE=Debug && cmake --build . --parallel 8 &&\
+scp -rq debug/* WINDOWS_PC:/v4d_build/debug/ &&\
+scp -rq release/* WINDOWS_PC:/v4d_build/release/ &&\
 echo "
 CLEAN BUILD FINISHED
 " &&\
 echo "Running unit tests DEBUG for Linux..." &&\
-cd build/debug && ./tests.linux &&\
+cd debug && ./tests &&\
 echo "Running unit tests RELEASE for Linux..." &&\
-cd ../release && ./tests.linux &&\
+cd ../release && ./tests &&\
 echo "Running unit tests DEBUG for Windows..." &&\
 ssh WINDOWS_PC "cd /v4d_build/debug/ && tests.exe" &&\
 echo "Running unit tests RELEASE for Windows..." &&\
 ssh WINDOWS_PC "cd /v4d_build/release/ && tests.exe" &&\
-cd ../../ &&\
-tools/successText.sh
-
+../../tools/successText.sh
