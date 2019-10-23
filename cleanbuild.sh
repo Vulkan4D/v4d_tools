@@ -9,6 +9,42 @@ cd "`dirname $0`/.."
 PROJECT_DIR=`pwd`
 set -e
 
+# Detect Current Platform
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)
+		PLATFORM=Linux
+		EXECUTABLE_SUFFIX=""
+	;;
+    Darwin*)
+		PLATFORM=Mac;
+		EXECUTABLE_SUFFIX=""
+	;;
+    CYGWIN*)
+		PLATFORM=Windows;
+		EXECUTABLE_SUFFIX=".exe"
+	;;
+    MINGW*)
+		PLATFORM=Windows;
+		EXECUTABLE_SUFFIX=".exe"
+	;;
+    *)
+		PLATFORM=Unknown
+		EXECUTABLE_SUFFIX=""
+esac
+echo "Detected current platform $PLATFORM"
+
+# Compile OpenSSL (pre-compiled for windows)
+if [ "$PLATFORM" = "Windows" ] ; then
+	cp dll/opensslconf.h src/openssl/include/openssl/
+else
+	cd src/openssl && ./config && make
+fi
+
+# make sure the build directory exists
+cd "$PROJECT_DIR"
+mkdir -p build || exit 1
+
 #clear
 echo "
 Cleaning up previous build...
@@ -31,18 +67,18 @@ Rebuilding Everything...
 # Cross-compile to all other platforms
 for crossplatform in "$@"
 do
-	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --parallel 8
-	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 8
+	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --parallel 8 || exit 1
+	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 8 || exit 1
 	rm CMakeCache.txt
 done
 
 # Compile for current platform
-cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --parallel 8
-cmake .. -DCMAKE_BUILD_TYPE=Debug && cmake --build . --parallel 8
+cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --parallel 8 || exit 1
+cmake .. -DCMAKE_BUILD_TYPE=Debug && cmake --build . --parallel 8 || exit 1
 
 for crossplatform in "$@"
 do
-	"$PROJECT_DIR/crosscompile/$crossplatform/copy.sh"
+	"$PROJECT_DIR/crosscompile/$crossplatform/copy.sh" || exit 1
 done
 
 # Compile successful
@@ -51,17 +87,17 @@ CLEAN BUILD FINISHED
 "
 
 # Run tests(Debug) on current platform
-echo "Running unit tests DEBUG for Linux..."
-cd "$PROJECT_DIR/build/debug" && ./tests
+echo "Running unit tests DEBUG for $PLATFORM..."
+cd "$PROJECT_DIR/build/debug" && ./tests$EXECUTABLE_SUFFIX || exit 1
 
 # Run tests(Release) on current platform
-echo "Running unit tests RELEASE for Linux..."
-cd "$PROJECT_DIR/build/release" && ./tests
+echo "Running unit tests RELEASE for $PLATFORM..."
+cd "$PROJECT_DIR/build/release" && ./tests$EXECUTABLE_SUFFIX || exit 1
 
 # Run tests on all other cross-compiled platforms
 for crossplatform in "$@"
 do
-	"$PROJECT_DIR/crosscompile/$crossplatform/tests.sh"
+	"$PROJECT_DIR/crosscompile/$crossplatform/tests.sh" || exit 1
 done
 
 # Build+tests Success !
