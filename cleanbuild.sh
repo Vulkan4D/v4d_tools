@@ -34,11 +34,13 @@ case "${unameOut}" in
 esac
 echo "Detected current platform $PLATFORM"
 
-# Compile OpenSSL (pre-compiled for windows)
-if [ "$PLATFORM" = "Windows" ] ; then
-	cp dll/opensslconf.h src/openssl/include/openssl/
-else
-	cd src/openssl && ./config && make
+# Prepare OpenSSL
+if [ ! -f "src/openssl/include/openssl/opensslconf.h" ] ; then
+	if [ "$PLATFORM" = "Windows" ] ; then
+		cp dll/opensslconf.h src/openssl/include/openssl/
+	else
+		cd src/openssl && ./config
+	fi
 fi
 
 # make sure the build directory exists
