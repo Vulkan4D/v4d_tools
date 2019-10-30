@@ -10,8 +10,6 @@
 #include <stdexcept>
 #include <sys/stat.h>
 
-#include "commoncpp/Logger.hpp"
-
 // https://github.com/KhronosGroup/glslang/
 
 using namespace std;
@@ -25,6 +23,7 @@ static unordered_map<uint, const char*> SHADER_TYPES = {
 	{4, "geom"},
 	{5, "frag"},
 	{6, "comp"},
+	// {7, "conf"},
 };
 
 string exec(string cmd) {
@@ -56,7 +55,7 @@ struct Shader {
 
 	Shader(string name, uint type) : name(name), type(type) {}
 
-	void Print() { LOG(content.str()); }
+	void Print() { cout << content.str() << endl; }
 
 	bool Compile() {
 		// Write temporary shader file
@@ -97,12 +96,12 @@ void IncludeFile(string filepath, stringstream& content) {
 
 int main(const int argc, const char** args) {
 	if (argc < 3) 
-		FATAL("You must provide a destination directory as the first argument, then one or more glsl files.");
+		throw runtime_error("You must provide a destination directory as the first argument, then one or more glsl files.");
 
 	// Check output directory
 	outputPath = args[1];
 	if (struct stat statbuf; stat(outputPath.c_str(), &statbuf) != 0 || !S_ISDIR(statbuf.st_mode)) 
-		FATAL("You must create directory '" << outputPath << "'");
+		throw runtime_error(string("You must create directory '") + outputPath + "'");
 
 	// Parse cache file
 	string cachefile = outputPath+"/shadercache.txt";
@@ -121,16 +120,16 @@ int main(const int argc, const char** args) {
 	for (int i = 2; i < argc; i++) {
 		// Parse file path and type
 		string filepath = args[i];
-		auto filepathRegex = regex(R"(^(.*/|)([^/]+)\.([^\.]+)$)");
+		regex filepathRegex(R"(^(.*/|)([^/]+)\.([^\.]+)$)");
 		if (!regex_match(filepath, filepathRegex)) 
-			FATAL("Given filepath is invalid '" << filepath << "'");
+			throw runtime_error(string("Given filepath is invalid '") + filepath + "'");
 		string name = regex_replace(filepath, filepathRegex, "$2");
 		string filetype = regex_replace(filepath, filepathRegex, "$3");
 
 		// Check input file
 		struct stat statbuf;
 		if (stat(filepath.c_str(), &statbuf) != 0) 
-			FATAL("File does not exist '" << filepath << "'");
+			throw runtime_error(string("File does not exist '") + filepath + "'");
 		// Compare mtime with cache
 		if (statbuf.st_mtime == filetimes[filepath])
 			continue;
@@ -173,17 +172,18 @@ int main(const int argc, const char** args) {
 
 			// Compile shader
 			for (auto& shader : shaders) if (!shader.Compile()) {
-				FATAL("SHADER COMPILATION FAILED");
+				throw runtime_error("SHADER COMPILATION FAILED");
 			}
 
-		} else 
-		// If input file is one of SHADER_TYPES, compile it directly without parsing
-		if (find_if(SHADER_TYPES.begin(), SHADER_TYPES.end(), [&filetype](pair<const uint, const char*>& pair) {return filetype == pair.second;}) != SHADER_TYPES.end()) {
-			if (!CompileShader(filepath, outputPath+"/"+name+"."+filetype+".spv")) {
-				FATAL("SHADER COMPILATION FAILED");
-			}
 		} else {
-			FATAL("Given filepath is not a valid shader file '" << filepath << "'");
+			// If input file is one of SHADER_TYPES, compile it directly without parsing
+			if (find_if(SHADER_TYPES.begin(), SHADER_TYPES.end(), [&filetype](pair<const uint, const char*>& pair) {return filetype == pair.second;}) != SHADER_TYPES.end()) {
+				if (!CompileShader(filepath, outputPath+"/"+name+"."+filetype+".spv")) {
+					throw runtime_error("SHADER COMPILATION FAILED");
+				}
+			} else {
+				throw runtime_error(string("Given filepath is not a valid shader file '") + filepath + "'");
+			}
 		}
 
 		// Compilation success
@@ -201,6 +201,6 @@ int main(const int argc, const char** args) {
 	// Success !
 
 	if (nbShadersCompiled > 0) 
-		LOG_SUCCESS(nbShadersCompiled << " SHADERS COMPILED SUCCESSFULLY!");
+		cout << nbShadersCompiled << " SHADERS COMPILED SUCCESSFULLY!" << endl;
 	return 0;
 }
