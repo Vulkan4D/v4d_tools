@@ -69,8 +69,8 @@ Rebuilding Everything...
 # Cross-compile to all other platforms
 for crossplatform in "$@"
 do
-	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --parallel 8 || exit 1
-	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 8 || exit 1
+	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCOMPILE_ASSETS=OFF .. && cmake --build . --parallel 8 || exit 1
+	cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile/$crossplatform/toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DCOMPILE_ASSETS=OFF .. && cmake --build . --parallel 8 || exit 1
 	rm CMakeCache.txt
 done
 
