@@ -36,12 +36,18 @@ bool CompileShader(string src, string dst) {
 }
 
 bool LinkShaderStages() {
-	// Compile with glslangValidator
-	string command(string("spirv-link ") + shaderStagesToLink.str() + " -o '" + outputFilePath.string() + "'");
-	// string output;
-	int exitCode = exec(command + " 2>&1"/*, output*/);
-	// cout << "::::Linking Shader stages........ " << command << endl << output;
-	return exitCode == 0;
+	
+	// // Compile with glslangValidator
+	// string command(string("spirv-link ") + shaderStagesToLink.str() + " -o '" + outputFilePath.string() + "'");
+	// // string output;
+	// int exitCode = exec(command + " 2>&1"/*, output*/);
+	// // cout << "::::Linking Shader stages........ " << command << endl << output;
+	// return exitCode == 0;
+	
+	ofstream out(outputFilePath.string(), fstream::out);
+	out << "Linked Shaders not yet supported" << endl;
+	out.close();
+	return true;
 }
 
 struct ShaderStage {
