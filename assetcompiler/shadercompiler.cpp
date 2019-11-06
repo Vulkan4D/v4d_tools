@@ -161,7 +161,7 @@ int main(const int argc, const char** args) {
 		while (getline(filecontent, line)) {
 			// If line is a shader definition, create a new shader and assign its type
 			cmatch match;
-			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+(" SHADER_REGEX_EXT_TYPES_GLSL ")\\s*"))) {
+			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)?(" SHADER_REGEX_EXT_TYPES_GLSL "))\\s*"))) {
 				type = match[2].str();
 				stages.emplace_back(type);
 				index++;
