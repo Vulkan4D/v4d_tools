@@ -25,7 +25,7 @@ bool CompileShader(string src, string dst) {
 	// Delete existing file
 	remove(dst.c_str());
 	// Compile with glslangValidator
-	string command(string("$VULKAN_SDK/bin/glslangValidator -V '") + src + "' -o '" + dst + "'");
+	string command(string("glslangValidator -V '") + src + "' -o '" + dst + "'");
 	// string output;
 	int exitCode = exec(command + " 2>&1"/*, output*/);
 	// cout << "::::Compiling Shader........ " << command << endl << output;
@@ -166,7 +166,7 @@ int main(const int argc, const char** args) {
 		while (getline(filecontent, line)) {
 			// If line is a shader definition, create a new shader and assign its type
 			cmatch match;
-			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)?(" SHADER_REGEX_EXT_TYPES_GLSL "))\\s*"))) {
+			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)*(" SHADER_REGEX_EXT_TYPES_GLSL "))\\s*"))) {
 				type = match[2].str();
 				stages.emplace_back(type);
 				index++;
