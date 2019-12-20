@@ -16,7 +16,7 @@ foreach(shader ${srcShaders})
 	if(IsShader)
 		string(REGEX REPLACE "\.glsl$" "" shaderFileName ${shader})
 		set(shaderInput ${ASSETS_RELATIVE_SRC}/${shader})
-		set(shaderOutput ${RUNTIME_OUTPUT_DIRECTORY}/${shaderFileName}.spv)
+		set(shaderOutput ${RUNTIME_OUTPUT_DIRECTORY}/${shaderFileName}.meta)
 		add_custom_command(
 			MAIN_DEPENDENCY ${shaderInput}
 			OUTPUT ${shaderOutput} POST_BUILD

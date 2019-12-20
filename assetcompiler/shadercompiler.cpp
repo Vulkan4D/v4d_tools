@@ -1,10 +1,13 @@
 #include <v4d.h>
 
+#include <sys/stat.h>
+
 using namespace std;
 
 filesystem::path inputFilePath, outputFilePath;
 vector<filesystem::path> includePaths {};
-stringstream shaderStagesToLink{""};
+vector<string> shaderSpvFiles {};
+stringstream commandLine {""};
 
 #define SHADER_REGEX_EXT_TYPES_GLSL "vert|tesc|tese|geom|frag|comp|mesh|task|rgen|rint|rahit|rchit|rmiss|rcall"
 #define SHADER_REGEX_EXT_TYPES "conf|glsl|hlsl|" SHADER_REGEX_EXT_TYPES_GLSL
@@ -32,18 +35,19 @@ bool CompileShader(string src, string dst) {
 	return exitCode == 0;
 }
 
-bool LinkShaderStages() {
+bool GenerateMetaFile() {
+	ofstream outputFile(outputFilePath.string(), fstream::out);
+	for (auto& file : shaderSpvFiles) {
+		outputFile << file << endl;
+	}
+	outputFile.close();
 	
-	// // Compile with glslangValidator
-	// string command(string("spirv-link ") + shaderStagesToLink.str() + " -o '" + outputFilePath.string() + "'");
-	// // string output;
-	// int exitCode = exec(command + " 2>&1"/*, output*/);
-	// // cout << "::::Linking Shader stages........ " << command << endl << output;
-	// return exitCode == 0;
-	
-	ofstream out(outputFilePath.string(), fstream::out);
-	out << "Linked Shaders not yet supported" << endl;
-	out.close();
+	// Generate Watch file (auto-compile upon saving source file)
+	string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
+	ofstream watchCommand(watchFilePath, fstream::out);
+	watchCommand << "while inotifywait -e close_write '" << inputFilePath.string() << "'; do " << commandLine.str() << "; done" << endl;
+	watchCommand.close();
+	chmod(watchFilePath.c_str(), 0777);
 	return true;
 }
 
@@ -58,7 +62,7 @@ struct ShaderStage {
 
 	bool Compile() {
 		// Write temporary shader file
-		v4d::io::FilePath tmpfilepath(regex_replace(outputFilePath.string(), regex("^(.*)\\.spv$"), string("$1.") + type));
+		v4d::io::FilePath tmpfilepath(regex_replace(outputFilePath.string(), regex("^(.*)\\.(spv|meta)$"), string("$1.") + type));
 		tmpfilepath.AutoCreateFile();
 		ofstream tmp(string(tmpfilepath), fstream::out | fstream::trunc);
 		tmp << content.str();
@@ -66,7 +70,7 @@ struct ShaderStage {
 		// Compile it and delete tmp file on success
 		if (CompileShader(tmpfilepath, string(tmpfilepath)+".spv")) {
 			tmpfilepath.Delete();
-			shaderStagesToLink << "'" << string(tmpfilepath) << ".spv" << "' ";
+			shaderSpvFiles.push_back(string(tmpfilepath)+".spv");
 			return true;
 		}
 		return false;
@@ -117,6 +121,7 @@ void IncludeFile(filesystem::path parentFile, const string& includeFile, strings
 }
 
 int main(const int argc, const char** args) {
+	commandLine << "'" << string(args[0]) << "'";
 	
 	if (argc < 3) 
 		throw runtime_error("You must provide at least two arguments (input and output paths). Additional arguments are include paths.");
@@ -124,8 +129,11 @@ int main(const int argc, const char** args) {
 	inputFilePath = args[1];
 	outputFilePath = args[2];
 	
+	commandLine << " '" << string(args[1]) << "' '" << string(args[2]) << "'";
+	
 	for (int i = 3; i < argc; ++i) {
 		includePaths.emplace_back(args[i]);
+		commandLine << " '" << string(args[i]) << "'";
 	}
 	
 	// Check input file
@@ -135,17 +143,21 @@ int main(const int argc, const char** args) {
 	if (inputFilePath.extension() == "" || !regex_match(inputFilePath.filename().string().c_str(), regex("^.*\\.((" SHADER_REGEX_EXT_TYPES_GLSL ")\\.glsl|(" SHADER_REGEX_EXT_TYPES "))$")))
 		throw runtime_error(string("Invalid input file path extension '") + inputFilePath.string() + "'");
 		
-	if (outputFilePath.extension() != ".spv")
-		throw runtime_error(string("Invalid output file path '") + inputFilePath.string() + "' (missing .spv extension)");
-	
 	// For a glsl file, parse it then compile it
 	if (regex_match(inputFilePath.filename().string().c_str(), regex("^.*\\.((" SHADER_REGEX_EXT_TYPES_GLSL ")\\.glsl|(" SHADER_REGEX_EXT_TYPES_GLSL "))$"))) {
+		
+		if (outputFilePath.extension() != ".spv")
+			throw runtime_error(string("Invalid output file path '") + inputFilePath.string() + "' (missing .spv extension)");
+		
 		// Input File is an individual stage to be compiled directly with glslangValidator
 		if (!CompileShader(inputFilePath.string(), outputFilePath.string()))
 			throw runtime_error("Failed to compile shader");
 		
 	} else if (inputFilePath.extension() == ".glsl") {
-		// Input File is multistage, must be Separated, Compiled, then Linked
+		// Input File is multistage, must be Separated, Compiled, then a meta file is created
+		
+		if (outputFilePath.extension() != ".meta")
+			throw runtime_error(string("Invalid output file path '") + inputFilePath.string() + "' (missing .meta extension)");
 		
 		// Prepare 2 initial places in memory to store shader stages
 		vector<ShaderStage> stages;
@@ -189,7 +201,7 @@ int main(const int argc, const char** args) {
 			throw runtime_error("SHADER COMPILATION FAILED");
 		
 		// Link shader stages into a single final Spir-V file
-		if (!LinkShaderStages())
+		if (!GenerateMetaFile())
 			throw runtime_error("SHADER LINKING FAILED");
 	}
 
