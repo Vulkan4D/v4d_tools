@@ -1,5 +1,9 @@
 set(ASSETS_RELATIVE_SRC ${PROJECT_SOURCE_DIR}/src)
-set(ASSETS_GLOB_SEARCH ${ASSETS_RELATIVE_SRC}/**/assets)
+
+set(ASSETS_DIRS 
+	${ASSETS_RELATIVE_SRC}/**/assets
+	${ASSETS_RELATIVE_SRC}/v4d/modules/**/assets
+)
 
 include(shaders.cmake)
 include(models.cmake)
