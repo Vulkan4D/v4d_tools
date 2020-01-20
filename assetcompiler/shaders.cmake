@@ -23,7 +23,7 @@ foreach(dir ${ASSETS_DIRS})
 				MAIN_DEPENDENCY ${shaderInput}
 				OUTPUT ${shaderOutput} POST_BUILD
 				WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-				COMMAND ${CMAKE_BINARY_DIR}/shadercompiler${CMAKE_EXECUTABLE_SUFFIX} ${shaderInput} ${shaderOutput} ${PROJECT_SOURCE_DIR}/src
+				COMMAND ${CMAKE_BINARY_DIR}/shadercompiler${CMAKE_EXECUTABLE_SUFFIX} ${shaderInput} ${shaderOutput} ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/src/v4d/core/utilities/graphics/shaders
 			)
 			list(APPEND compiledShaders ${shaderOutput})
 		endif()
