@@ -69,8 +69,8 @@ Rebuilding Everything...
 # Cross-compile to all other platforms
 for crossplatform in "$@"
 do
-	"../crosscompile/$crossplatform/build.sh" Release || exit 1
-	"../crosscompile/$crossplatform/build.sh" Debug || exit 1
+	rm -f CMakeCache.txt ; "../crosscompile/$crossplatform/build.sh" Release || exit 1
+	rm -f CMakeCache.txt ; "../crosscompile/$crossplatform/build.sh" Debug || exit 1
 done
 
 # Compile for current platform
@@ -80,7 +80,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug && cmake --build . --parallel 8 || exit 1
 
 for crossplatform in "$@"
 do
-	"$PROJECT_DIR/crosscompile/$crossplatform/copy.sh" || exit 1
+	"$PROJECT_DIR/crosscompile/$crossplatform/copy.sh" release || exit 1
+	"$PROJECT_DIR/crosscompile/$crossplatform/copy.sh" debug || exit 1
 done
 
 # Compile successful

@@ -8,6 +8,7 @@ filesystem::path inputFilePath, outputFilePath;
 vector<filesystem::path> includePaths {};
 vector<string> shaderSpvFiles {};
 stringstream commandLine {""};
+std::unordered_map<std::string,int> includedFilesList {};
 
 #define SHADER_REGEX_EXT_TYPES_GLSL "vert|tesc|tese|geom|frag|comp|mesh|task|rgen|rint|rahit|rchit|rmiss|rcall"
 #define SHADER_REGEX_EXT_TYPES "conf|glsl|hlsl|" SHADER_REGEX_EXT_TYPES_GLSL
@@ -28,7 +29,7 @@ bool CompileShader(string src, string dst) {
 	// Delete existing file
 	remove(dst.c_str());
 	// Compile with glslangValidator
-	string command(string("glslangValidator -V --target-env vulkan1.1 '") + src + "' -o '" + dst + "'");
+	string command(string("glslangValidator -V --target-env vulkan1.2 '") + src + "' -o '" + dst + "'");
 	// string output;
 	int exitCode = exec(command + " 2>&1"/*, output*/);
 	// cout << "::::Compiling Shader........ " << command << endl << output;
@@ -42,10 +43,14 @@ bool GenerateMetaFile() {
 	}
 	outputFile.close();
 	
+	std::stringstream includedFiles {""};
+	for (auto [incl,_] : includedFilesList)
+		includedFiles << "\\\n  '" << incl << "'";
+	
 	// Generate Watch file (auto-compile upon saving source file)
 	string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
 	ofstream watchCommand(watchFilePath, fstream::out);
-	watchCommand << "while inotifywait -e close_write '" << inputFilePath.string() << "'; do " << commandLine.str() << "; done" << endl;
+	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\nsleep 1\nsh $0 &" << endl;
 	watchCommand.close();
 	chmod(watchFilePath.c_str(), 0777);
 	return true;
@@ -69,7 +74,7 @@ struct ShaderStage {
 		tmp.close();
 		// Compile it and delete tmp file on success
 		if (CompileShader(tmpfilepath, string(tmpfilepath)+".spv")) {
-			tmpfilepath.Delete();
+			// tmpfilepath.Delete();
 			shaderSpvFiles.push_back(string(tmpfilepath)+".spv");
 			return true;
 		}
@@ -118,6 +123,7 @@ void IncludeFile(filesystem::path parentFile, const string& includeFile, strings
 	ifstream filecontent(includeFilePath);
 	string line;
 	while (getline(filecontent, line)) ParseLine(includeFilePath.string(), line, content);
+	includedFilesList[includeFilePath];
 }
 
 int main(const int argc, const char** args) {
@@ -200,9 +206,9 @@ int main(const int argc, const char** args) {
 		for (auto& stage : stages) if (!stage.Compile())
 			throw runtime_error("SHADER COMPILATION FAILED");
 		
-		// Link shader stages into a single final Spir-V file
+		// Meta file
 		if (!GenerateMetaFile())
-			throw runtime_error("SHADER LINKING FAILED");
+			throw runtime_error("META GENERATION FAILED");
 	}
 
 }
