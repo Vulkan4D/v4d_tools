@@ -6,4 +6,4 @@ set(ASSETS_DIRS
 )
 
 include(shaders.cmake)
-include(models.cmake)
+include(resources.cmake)
