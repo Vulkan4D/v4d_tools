@@ -1,4 +1,4 @@
-cd `dirname $0`
+cd `dirname $0`/..
 git remote remove origin
 current=`git branch --show-current`
 git checkout --orphan _newproject
