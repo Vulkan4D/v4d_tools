@@ -37,7 +37,7 @@ echo "Detected current platform $PLATFORM"
 # Prepare OpenSSL
 if [ ! -f "src/openssl/include/openssl/opensslconf.h" ] ; then
 	if [ "$PLATFORM" = "Windows" ] ; then
-		cp dll/opensslconf.h src/openssl/include/openssl/
+		cp crosscompile/windows/opensslconf.h src/openssl/include/openssl/
 	else
 		cd src/openssl && ./config
 	fi
