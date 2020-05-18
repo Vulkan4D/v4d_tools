@@ -8,6 +8,7 @@ filesystem::path inputFilePath, outputFilePath;
 vector<filesystem::path> includePaths {};
 vector<string> shaderSpvFiles {};
 stringstream commandLine {""};
+string firstLine {"#version 460 core\n\n"};
 std::unordered_map<std::string,int> includedFilesList {};
 
 #define SHADER_REGEX_EXT_TYPES_GLSL "vert|tesc|tese|geom|frag|comp|mesh|task|rgen|rint|rahit|rchit|rmiss|rcall"
@@ -100,6 +101,9 @@ void ParseLine(const string& inputFile, const string& line, stringstream* conten
 			throw runtime_error(string("Failed to parse include directive '") + line + "'");
 		}
 		return;
+	} else if (regex_match(line.c_str(), regex("\\s*#version.+"))) {
+		firstLine = line + '\n';
+		return;
 	}
 	
 	// Insert the line
@@ -184,10 +188,18 @@ int main(const int argc, const char** args) {
 		while (getline(filecontent, line)) {
 			// If line is a shader definition, create a new shader and assign its type
 			cmatch match;
-			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)*(" SHADER_REGEX_EXT_TYPES_GLSL "))\\s*"))) {
+			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)*(" SHADER_REGEX_EXT_TYPES_GLSL "))(\\.?(\\d*))\\s*"))) {
 				type = match[2].str();
+				std::string typeUPPER = match[4].str();
+				v4d::String::ToUpperCase(typeUPPER);
+				std::string subPass = match[6].str();
 				stages.emplace_back(type);
 				index++;
+				stages[index].content << firstLine << "#define SHADER_" << typeUPPER << "\n";
+				if (subPass != "") {
+					stages[index].content << "#define SHADER_SUBPASS_" << subPass << "\n";
+				}
+				stages[index].content << '\n';
 				for (const auto& [cm, content] : common) {
 					if (cm == "" || regex_match(type.c_str(), match, regex(cm))) {
 						stages[index].content << content.str() << '\n';
