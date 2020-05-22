@@ -178,9 +178,8 @@ int main(const int argc, const char** args) {
 
 		// Initialize some vars
 		string line;
-		map<string, stringstream> common;
-		string current_common = "";
-		common[current_common] = stringstream("");
+		vector<tuple<string, stringstream*>> common {};
+		stringstream* current_common = get<1>(common.emplace_back("", new stringstream("//////////// Common content for all ///////////\n")));
 		string type = "";
 		int index = -1;
 
@@ -202,14 +201,15 @@ int main(const int argc, const char** args) {
 				stages[index].content << '\n';
 				for (const auto& [cm, content] : common) {
 					if (cm == "" || regex_match(type.c_str(), match, regex(cm))) {
-						stages[index].content << content.str() << '\n';
+						stages[index].content << content->str() << '\n';
 					}
 				}
 			} else if (regex_match(line.c_str(), match, regex("\\s*#common\\s+(.+)\\s*"))) {
-				current_common = match[1].str();
-				common[current_common] = stringstream("");
+				auto cm = new stringstream("");
+				*cm << "//////////// Common content for '" << match[1].str() << "' ///////////\n";
+				current_common = get<1>(common.emplace_back(match[1].str(), cm));
 			} else {
-				ParseLine(inputFilePath.string(), line, (type == "")? &common[current_common] : &stages[index].content);
+				ParseLine(inputFilePath.string(), line, (type == "")? current_common : &stages[index].content);
 			}
 		}
 		filecontent.close();
