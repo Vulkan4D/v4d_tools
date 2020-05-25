@@ -221,6 +221,10 @@ int main(const int argc, const char** args) {
 		// Meta file
 		if (!GenerateMetaFile())
 			throw runtime_error("META GENERATION FAILED");
+			
+		for (auto&[str, strstream] : common) {
+			delete strstream;
+		}
 	}
 
 }
