@@ -30,7 +30,7 @@ bool CompileShader(string src, string dst) {
 	// Delete existing file
 	remove(dst.c_str());
 	// Compile with glslangValidator
-	string command(string("glslangValidator -V --target-env vulkan1.1 '") + src + "' -o '" + dst + "'");
+	string command(string("glslangValidator -V --target-env vulkan1.2 '") + src + "' -o '" + dst + "'");
 	// string output;
 	int exitCode = exec(command + " 2>&1"/*, output*/);
 	// cout << "::::Compiling Shader........ " << command << endl << output;
