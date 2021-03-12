@@ -109,10 +109,10 @@ struct GalaxyInfo {
 	float squish;
 	float attenuationCloudsFrequency;
 	float attenuationCloudsFactor;
-	vec3 position;
 	vec3 noiseOffset;
-	mat4 rotation;
 	float irregularities;
+	// vec3 position;
+	// mat4 rotation;
 };
 
 GalaxyInfo GetGalaxyInfo(vec3 galaxyPosition) {
@@ -151,12 +151,12 @@ GalaxyInfo GetGalaxyInfo(vec3 galaxyPosition) {
 		float s = sin(angle);
 		float c = cos(angle);
 		float oc = 1.0 - c;
-		info.rotation = mat4(
-			oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s, 0.0,
-			oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0,
-			oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c, 0.0,
-			0.0, 0.0, 0.0, 1.0
-		);
+		// info.rotation = mat4(
+		// 	oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s, 0.0,
+		// 	oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0,
+		// 	oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c, 0.0,
+		// 	0.0, 0.0, 0.0, 1.0
+		// );
 	}
 	return info;
 }
@@ -168,7 +168,7 @@ float GalaxyStarDensity(in vec3 pos, in GalaxyInfo info) {
 	// Rotation
 	// if (info.spiralCloudsFactor > 0.0 || info.squish > 0.2) pos = (info.rotation * vec4(pos, 1.0)).xyz;
 
-	float squish = info.squish * 2.0;
+	float squish = info.squish * 50.0;
 	float lenSquished = length(pos*vec3(1.0, squish + 1.0, 1.0));
 	float radiusGradient = 1.0 - pow(clamp01(len + abs(pos.y)*squish), 5.0);
 
@@ -199,7 +199,7 @@ float GalaxyStarDensity(in vec3 pos, in GalaxyInfo info) {
 	float swirl = len * info.swirlTwist * 10.0;
 	float spiralNoise = FastSimplexFractal((vec3(
 		pos.x * cos(swirl) - pos.z * sin(swirl),
-		pos.y * (squish * 10.0 + 1.0),
+		pos.y * (squish * 0.0 + 1.0),
 		pos.z * cos(swirl) + pos.x * sin(swirl)
 	)+noiseOffset)*info.cloudsFrequency*5.0)/2.0+0.5;
 	float spirale = clamp01(pow(spiralNoise, (1.1-info.swirlDetail)*5.0) + (info.cloudsSize*1.5) - len*1.5 - (abs(pos.y)*squish*10.0)) * radiusGradient;
@@ -238,32 +238,23 @@ void main() {
 	vec2 st = gl_FragCoord.xy/u_resolution.xy;
 	vec4 finalColor;
 
-	vec3 galaxyPos = vec3(0.100,0.035,0.098);
-
-	GalaxyInfo info = GetGalaxyInfo(galaxyPos);
+	GalaxyInfo info;
+	/*float*/info.spiralCloudsFactor = 0.5;
+	/*float*/info.swirlTwist = 4.0;
+	/*float*/info.swirlDetail = 0.01;
+	/*float*/info.coreSize = 0.25;
+	/*float*/info.cloudsSize = 0.6;
+	/*float*/info.cloudsFrequency = 0.5;
+	/*float*/info.squish = 1.17;
+	/*float*/info.attenuationCloudsFrequency = 0.0;
+	/*float*/info.attenuationCloudsFactor = 0.0;
+	/*vec3*/info.noiseOffset = vec3(0.3, 0.4, 0.5);
+	/*float*/info.irregularities = 0.3;
+	// /*vec3*/info.position = vec3(0.0);
+	// /*mat4*/info.rotation = mat4(1.0);
 
 	vec3 pos = vec3(st.s-0.5, 0.0, st.t-0.5) * 2.0; // top
-	// vec3 pos = vec3(st.s-0.5, st.t-0.5, 0.0) * 2.0; // side
+	// pos = vec3(st.s-0.5, st.t-0.5, 0.0) * 2.0; // side
 	float density = GalaxyStarDensity(pos, info);
 	gl_FragColor = vec4(GalaxyStarColor(pos, info) * density, 1.0);
-
-	// // rotate camera
-	// vec3 axis = normalize(vec3(0.007,0.255,0.510));
-	// float angle = 1.284;
-	// float s = sin(angle);
-	// float c = cos(angle);
-	// float oc = 1.0 - c;
-	// mat4 rot = mat4(
-	// oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s, 0.0,
-	// oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0,
-	// oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c, 0.0,
-	// 0.0, 0.0, 0.0, 1.0
-	// );
-	// for (float y = 0.4; y > -0.4; y -= 0.001) {
-	// if (finalColor.a > 8.0) break;
-	// vec3 pos = (rot * vec4(vec3(st.s-0.5, y, st.t-0.5), 1.0)).xyz * 1.3;
-	// float density = GalaxyStarDensity(pos, info);
-	// finalColor += vec4(GalaxyStarColor(pos, info) * density*0.05, 0.02);
-	// }
-	// gl_FragColor = finalColor * 0.5;
 }
