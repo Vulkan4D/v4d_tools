@@ -4,7 +4,7 @@ uniform vec2 u_resolution;
 
 const int N = 20;
 const int CHART_ZOOM = N*2;
-const float MAX_POS = 100000.;
+const float MAX_POS = 10000.;
 const float MIN_POS = -MAX_POS;
 const vec3 OFFSET = vec3(0);
 const int INTEGRAL = 0;
