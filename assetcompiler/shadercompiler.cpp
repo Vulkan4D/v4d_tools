@@ -1,6 +1,13 @@
 #include <v4d.h>
+#include "utilities/io/FilePath.h"
 
 #include <sys/stat.h>
+#include <filesystem>
+#include <vector>
+#include <string>
+#include <regex>
+#include <unordered_map>
+#include <fstream>
 
 using namespace std;
 
