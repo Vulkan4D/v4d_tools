@@ -58,7 +58,7 @@ bool GenerateMetaFile() {
 	// Generate Watch file (auto-compile upon saving source file)
 	string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
 	ofstream watchCommand(watchFilePath, fstream::out);
-	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sleep 0.5\n  sh -c $0 & \nfi" << endl;
+	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sleep 0.5\n  sh -c $0 \nfi" << endl;
 	watchCommand.close();
 	chmod(watchFilePath.c_str(), 0777);
 	return true;
