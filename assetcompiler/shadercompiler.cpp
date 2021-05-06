@@ -48,11 +48,13 @@ bool GenerateMetaFile() {
 		includedFiles << "\\\n  '" << incl << "'";
 	
 	// Generate Watch file (auto-compile upon saving source file)
-	string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
-	ofstream watchCommand(watchFilePath, fstream::out);
-	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sh -c $0 \nfi" << endl;
-	watchCommand.close();
-	chmod(watchFilePath.c_str(), 0777);
+	#ifdef _DEBUG
+		string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
+		ofstream watchCommand(watchFilePath, fstream::out);
+		watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sh -c $0 \nfi" << endl;
+		watchCommand.close();
+		chmod(watchFilePath.c_str(), 0777);
+	#endif
 	return true;
 }
 
@@ -74,7 +76,9 @@ struct ShaderStage {
 		tmp.close();
 		// Compile it and delete tmp file on success
 		if (CompileShader(tmpfilepath, string(tmpfilepath)+".spv")) {
-			// tmpfilepath.Delete();
+			#ifdef _RELEASE
+				tmpfilepath.Delete();
+			#endif
 			shaderSpvFiles.push_back(string(tmpfilepath)+".spv");
 			return true;
 		}
