@@ -21,15 +21,7 @@ std::unordered_map<std::string,int> includedFilesList {};
 #define SHADER_REGEX_EXT_TYPES_GLSL "vert|tesc|tese|geom|frag|comp|mesh|task|rgen|rint|rahit|rchit|rmiss|rcall"
 #define SHADER_REGEX_EXT_TYPES "conf|glsl|hlsl|" SHADER_REGEX_EXT_TYPES_GLSL
 
-int exec(string cmd/*, string& result*/) {
-	// array<char, 128> buffer;
-	// FILE* pipe(popen(cmd.c_str(), "r"));
-	// if (!pipe) throw runtime_error("popen() failed!");
-	// while (!feof(pipe)) {
-	// 	if (fgets(buffer.data(), 128, pipe) != nullptr)
-	// 		result += buffer.data();
-	// }
-	// return WEXITSTATUS(pclose(pipe));
+int exec(string cmd) {
 	return system(cmd.c_str());
 }
 
@@ -47,7 +39,7 @@ bool CompileShader(string src, string dst) {
 bool GenerateMetaFile() {
 	ofstream outputFile(outputFilePath.string(), fstream::out);
 	for (auto& file : shaderSpvFiles) {
-		outputFile << file << endl;
+		outputFile << regex_replace(file, regex("^.*/([^/]+)\\.spv$"), string("$1")) << endl;
 	}
 	outputFile.close();
 	
@@ -58,7 +50,7 @@ bool GenerateMetaFile() {
 	// Generate Watch file (auto-compile upon saving source file)
 	string watchFilePath = regex_replace(outputFilePath.string(), regex("^(.*)\\.meta$"), string("$1.watch.sh"));
 	ofstream watchCommand(watchFilePath, fstream::out);
-	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sleep 0.5\n  sh -c $0 \nfi" << endl;
+	watchCommand << "inotifywait -e modify \\\n  '" << inputFilePath.string() << "'" << includedFiles.str() << "\n\nif [[ -e '" << outputFilePath.string() << "' ]] ; then\n  echo \"\n  \"\n  " << commandLine.str() << "\n  echo \"\n  \"\n  sh -c $0 \nfi" << endl;
 	watchCommand.close();
 	chmod(watchFilePath.c_str(), 0777);
 	return true;
@@ -134,7 +126,7 @@ void IncludeFile(filesystem::path parentFile, const string& includeFile, strings
 	ifstream filecontent(includeFilePath);
 	string line;
 	while (getline(filecontent, line)) ParseLine(includeFilePath.string(), line, content);
-	includedFilesList[includeFilePath];
+	includedFilesList[includeFilePath]++;
 }
 
 int main(const int argc, const char** args) {
