@@ -29,7 +29,12 @@ bool CompileShader(string src, string dst) {
 	// Delete existing file
 	remove(dst.c_str());
 	// Compile with glslangValidator
-	string command(string("glslangValidator -V --target-env vulkan1.2 '") + src + "' -o '" + dst + "'");
+	#ifdef _DEBUG
+		std::cout << "Compiling shader with DEBUG information" << std::endl;
+		string command(string("glslangValidator -V --target-env vulkan1.2 -g '") + src + "' -o '" + dst + "'");
+	#else
+		string command(string("glslangValidator -V --target-env vulkan1.2 '") + src + "' -o '" + dst + "'");
+	#endif
 	// string output;
 	int exitCode = exec(command + " 2>&1"/*, output*/);
 	// cout << "::::Compiling Shader........ " << command << endl << output;
@@ -197,7 +202,13 @@ int main(const int argc, const char** args) {
 				std::string subPass = match[6].str();
 				stages.emplace_back(type);
 				index++;
-				stages[index].content << firstLine << "#define SHADER_" << typeUPPER << "\n";
+				stages[index].content << firstLine << 
+				#ifdef _DEBUG
+					"#define _DEBUG\n"
+				#else
+					"#define _RELEASE\n"
+				#endif
+				<< "#define SHADER_" << typeUPPER << "\n";
 				if (subPass != "") {
 					stages[index].content << "#define SHADER_SUBPASS_" << subPass << "\n";
 				}
