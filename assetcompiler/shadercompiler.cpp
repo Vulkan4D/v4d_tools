@@ -14,6 +14,7 @@ using namespace std;
 filesystem::path inputFilePath, outputFilePath;
 vector<filesystem::path> includePaths {};
 vector<string> shaderSpvFiles {};
+vector<string> shaderSubpasses {};
 stringstream commandLine {""};
 string firstLine {"#version 460 core\n\n"};
 std::unordered_map<std::string,int> includedFilesList {};
@@ -44,7 +45,7 @@ bool CompileShader(string src, string dst) {
 bool GenerateMetaFile() {
 	ofstream outputFile(outputFilePath.string(), fstream::out);
 	for (auto& file : shaderSpvFiles) {
-		outputFile << regex_replace(file, regex("^.*/([^/]+)\\.spv$"), string("$1")) << endl;
+		outputFile << file << '\n';
 	}
 	outputFile.close();
 	
@@ -65,10 +66,11 @@ bool GenerateMetaFile() {
 
 struct ShaderStage {
 	string type;
+	int subpass;
 
 	stringstream content{""};
 
-	ShaderStage(const string& type) : type(type) {}
+	ShaderStage(const string& type, int subpass = 0) : type(type), subpass(subpass) {}
 
 	void Print() { cout << content.str() << endl; }
 
@@ -84,7 +86,7 @@ struct ShaderStage {
 			#ifdef _RELEASE
 				tmpfilepath.Delete();
 			#endif
-			shaderSpvFiles.push_back(string(tmpfilepath)+".spv");
+			shaderSpvFiles.push_back(std::to_string(subpass) + " " + regex_replace(string(tmpfilepath), regex("^.*/([^/]+)$"), string("$1")));
 			return true;
 		}
 		return false;
@@ -195,12 +197,12 @@ int main(const int argc, const char** args) {
 		while (getline(filecontent, line)) {
 			// If line is a shader definition, create a new shader and assign its type
 			cmatch match;
-			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)*(" SHADER_REGEX_EXT_TYPES_GLSL "))(\\.?(\\d*))\\s*"))) {
+			if (regex_match(line.c_str(), match, regex("\\s*#(shader|stage)\\s+((\\w+\\.)*(" SHADER_REGEX_EXT_TYPES_GLSL "))([\\.\\s]*(\\d*))\\s*"))) {
 				type = match[2].str();
 				std::string typeUPPER = match[4].str();
 				v4d::String::ToUpperCase(typeUPPER);
 				std::string subPass = match[6].str();
-				stages.emplace_back(type);
+				stages.emplace_back(type, atoi(subPass.c_str()));
 				index++;
 				stages[index].content << firstLine << 
 				#ifdef _DEBUG
@@ -208,11 +210,7 @@ int main(const int argc, const char** args) {
 				#else
 					"#define _RELEASE\n"
 				#endif
-				<< "#define SHADER_" << typeUPPER << "\n";
-				if (subPass != "") {
-					stages[index].content << "#define SHADER_SUBPASS_" << subPass << "\n";
-				}
-				stages[index].content << '\n';
+				<< "#define SHADER_" << typeUPPER << "\n" << "#define SHADER_SUBPASS_" << atoi(subPass.c_str()) << "\n\n";
 				for (const auto& [cm, content] : common) {
 					if (cm == "" || regex_match(type.c_str(), match, regex(cm))) {
 						stages[index].content << content->str() << '\n';
